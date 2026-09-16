@@ -771,3 +771,40 @@ section[id]{ scroll-margin-top:84px; }
   .coda-quotes{ grid-template-columns:1fr; gap:12px; }
   .tl-hist .tl-body{ padding:18px 18px 20px; }
 }
+
+/* ============================================================
+   图文配图（二级页）
+   ------------------------------------------------------------
+   多列行内的图片统一裁成 4:3 以便对齐；单张通栏图与图件类不裁切，
+   按原比例完整呈现（规划图、展板等信息量大的图必须完整）。
+   ============================================================ */
+.fig-row{ display:grid; gap:22px; margin-top:48px; }
+.fig-row.cols-2{ grid-template-columns:1fr 1fr; }
+.fig-row.cols-3{ grid-template-columns:repeat(3,1fr); }
+
+figure.fig{ margin:0; }
+figure.fig img{
+  width:100%; height:auto; display:block;
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--paper-3);
+}
+.fig-row.cols-2 figure.fig img,
+.fig-row.cols-3 figure.fig img{ aspect-ratio:4 / 3; object-fit:cover; }
+
+figure.fig figcaption{
+  margin-top:11px; font-size:12.5px; line-height:1.85; color:var(--ink-3);
+}
+figure.fig figcaption b{ color:var(--ink-2); font-weight:600; }
+figure.fig figcaption .src{
+  display:block; margin-top:4px;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--ink-3);
+}
+
+@media (max-width:1080px){
+  .fig-row.cols-3{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:760px){
+  .fig-row.cols-2,
+  .fig-row.cols-3{ grid-template-columns:1fr; gap:18px; }
+  .fig-row{ margin-top:34px; }
+}
