@@ -915,6 +915,70 @@ section.has-band{ padding-top:0; }
 @media (min-width:1680px){ body.has-sidenav{ --maxw:1220px; } }
 @media (max-width:1199px){ .side-nav{ display:none; } }
 
+/* ============================================================
+   人物档案详情页
+   ============================================================ */
+.pd-head{ display:flex; gap:24px; align-items:center; margin:18px 0 20px; }
+.pd-head .avatar{ width:76px; height:76px; font-size:30px; }
+.pd-head h1{ font-size:clamp(26px, 3.4vw, 40px); margin:6px 0 8px; }
+.pd-sub{ font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:var(--ink-3); margin:0; }
+
+.pd-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px; }
+.pd-tags span{
+  font-size:12px; padding:3px 11px; border:1px solid var(--line); border-radius:2px;
+  color:var(--ink-2); background:var(--paper-2);
+}
+.pd-story{ max-width:74ch; }
+.pd-story p{ font-size:15.5px; line-height:2.1; color:var(--ink-2); margin:0 0 20px; }
+.pd-note{
+  margin:36px 0 0; padding:16px 18px; font-size:12.5px; line-height:1.85; color:var(--ink-3);
+  background:rgba(176,134,59,.08); border-left:3px solid var(--ochre);
+  border-radius:0 var(--radius) var(--radius) 0; max-width:74ch;
+}
+.pd-note a{ color:var(--red); }
+.pd-nav{
+  display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between;
+  margin-top:48px; padding-top:26px; border-top:1px solid var(--line);
+}
+
+/* ============================================================
+   首页人物档案轮播
+   —— 中间大卡、两侧露边：滑动式轨道 + scroll-snap，
+      当前居中的一张加描边与阴影，圆点同步。
+   ============================================================ */
+.ppl-carousel{ position:relative; margin-top:36px; }
+.ppl-track{
+  display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:6px 0 24px; scrollbar-width:none; -ms-overflow-style:none;
+}
+.ppl-track::-webkit-scrollbar{ display:none; }
+.ppl-slide{ flex:0 0 47%; scroll-snap-align:center; }
+.ppl-slide .pcard{ height:100%; }
+.ppl-slide.on .pcard{ border-color:#c9bda6; box-shadow:var(--shadow-md); }
+
+.ppl-nav{ display:flex; align-items:center; justify-content:center; gap:16px; }
+.ppl-arrow{
+  width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink-2); font-size:14px; line-height:1;
+  cursor:pointer; transition:.2s;
+}
+.ppl-arrow:hover{ border-color:var(--ink-3); color:var(--red); }
+.ppl-dots{ display:flex; gap:8px; }
+.ppl-dots button{
+  width:9px; height:9px; padding:0; border-radius:50%; cursor:pointer;
+  border:1px solid rgba(121,112,95,.45); background:var(--paper-3); transition:.2s;
+}
+.ppl-dots button.on{ background:var(--red); border-color:var(--red); }
+
+@media (max-width:1080px){ .ppl-slide{ flex:0 0 62%; } }
+@media (max-width:760px){
+  .ppl-slide{ flex:0 0 86%; }
+  .pd-head{ gap:16px; }
+  .pd-head .avatar{ width:58px; height:58px; font-size:22px; }
+  .pd-nav{ flex-direction:column; }
+  .pd-nav .btn{ text-align:center; }
+}
+
 @media (max-width:1080px){
   .feature, .feature.flip{ grid-template-columns:1fr; gap:26px; align-items:start; }
   .feature.flip .feature-media{ order:0; }

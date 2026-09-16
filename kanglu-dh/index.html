@@ -140,7 +140,7 @@
         <span class="bgmark">叁</span>
         <span class="idx">03 / PEOPLE</span>
         <h3>人物档案</h3>
-        <p>口述档案卡片：制衣厂主、日结工、配套工序从业者、新入行者与研究者。可按身份筛选与关键词检索，点击进入完整档案。</p>
+        <p>四份田野访谈：日结散工、长工与「厂二代」。他们分处产业链的不同位置，却共享同一片空间。可按身份筛选与关键词检索。</p>
         <span class="arrow">进入</span>
       </a>
     </div>
@@ -178,6 +178,28 @@
 
       <div class="tl-more"><a class="btn ghost" href="background.html#chronicle">查看背景资料中的完整编年（16 条）</a></div>
     </div>
+  </div>
+</section>
+
+<!-- ============ 人物档案 ============ -->
+<section id="people" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Field Archive</p>
+      <h2 class="h-sec">人物档案</h2>
+      <p class="lead">四份田野访谈。他们分处产业链的不同位置，却共享同一片一平方公里的空间。卡片上是身份标签与原话，点开是完整档案。</p>
+    </div>
+
+    <div class="ppl-carousel">
+      <div class="ppl-track" id="pplTrack"></div>
+      <div class="ppl-nav">
+        <button class="ppl-arrow" id="pplPrev" type="button" aria-label="上一份档案">←</button>
+        <div class="ppl-dots" id="pplDots"></div>
+        <button class="ppl-arrow" id="pplNext" type="button" aria-label="下一份档案">→</button>
+      </div>
+    </div>
+
+    <p class="tl-more" style="margin-top:26px"><a class="btn ghost" href="people.html">进入人物档案页（4 份）</a></p>
   </div>
 </section>
 
@@ -266,11 +288,13 @@
 <script src="assets/js/data.js"></script>
 <script src="assets/js/people-data.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/people.js"></script>
 <script>
   document.getElementById('recPeople').textContent = PEOPLE.length;
   document.getElementById('recPoi').textContent = POIS.length;
   renderStats('#stats');
   renderHistory('#hist');
+  initPeopleCarousel();
 
   // 人口与产业构成
   const BARS = [

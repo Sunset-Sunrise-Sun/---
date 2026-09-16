@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>人物档案 · 康鹭记忆</title>
-<meta name="description" content="广州康鹭制衣村 16 份人物口述档案：制衣厂主、配套从业者、制衣工人与研究者，可按身份筛选与检索。">
+<meta name="description" content="广州康鹭制衣村的人物口述档案：4 份田野访谈，含散工、长工与「厂二代」，可按身份筛选与关键词检索。">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body data-page="people">
@@ -26,170 +26,84 @@
   </div>
 </header>
 
-<section class="page-banner">
+<section class="page-banner page-banner--flush">
   <div class="wrap">
     <p class="crumb"><a href="index.html">首页</a> / 人物档案</p>
-    <h1>康鹭人物档案</h1>
+    <h1>人物档案</h1>
     <p class="lead">
-      每一张卡片是一份口述档案：一句他/她说过的原话，加上这句话背后的年头、厂房与账目。
-      可按身份筛选、按关键词检索，点击卡片展开完整档案。
-      <br><b class="small">档案内容由课题组自行录入与维护，如需增删改，编辑 <code style="font-family:var(--mono);font-size:12px">assets/js/people-data.js</code> 即可。</b>
+      四份来自田野的访谈档案。他们分处「日结散工、长工、厂主」的不同位置，
+      却共享同一条产业链、同一片一平方公里的空间。卡片上是他们的身份标签与原话，
+      点开是完整档案。
     </p>
+  </div>
+</section>
+
+<!-- 影像带 -->
+<section class="has-band" style="padding-bottom:0">
+  <div class="band short">
+    <img class="band-img" src="assets/img/field/band-market.jpg"
+         srcset="assets/img/field/band-market-960.jpg 960w, assets/img/field/band-market.jpg 2560w"
+         sizes="100vw" width="2560" height="711" loading="lazy" decoding="async"
+         alt="招工广场宽幅全景：白色棚顶之下是 LED 公示屏与往来的人群">
+    <div class="band-veil" aria-hidden="true"></div>
+    <div class="band-cap">
+      <div class="wrap">
+        <p class="band-kicker">Field Archive · 4 Records</p>
+        <p class="band-sub">这四份档案都来自 2026 年 8 月的田野走访。访谈地点多在招工广场与厂区附近，谈话对象由同乡网络介绍。</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="tight">
   <div class="wrap">
-
-    <div class="notice-tip" id="sampleNotice">
-      <span style="flex-shrink:0;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#8a6524;padding-top:2px">SAMPLE</span>
-      <div>
-        当前展示的是<b>示例档案</b>，用于说明卡片格式与字段含义。请打开
-        <code>assets/js/people-data.js</code>，把 <code>PEOPLE</code> 数组里的内容替换为你的调研对象。
-        改完保存、刷新页面即可生效。全部替换完成后，把 <code>assets/js/people.js</code> 顶部的
-        <code>SHOW_SAMPLE_NOTICE</code> 改为 <code>false</code>，这条提示就会消失。
-      </div>
-    </div>
-
     <div class="filter-bar">
       <span class="fl">身份</span>
       <div id="pFilters" style="display:flex;flex-wrap:wrap;gap:8px"></div>
       <div class="search-box">
         <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input id="pSearch" type="search" placeholder="搜索姓名 / 籍贯 / 关键词">
+        <input id="pSearch" type="search" placeholder="搜索籍贯 / 年限 / 关键词">
       </div>
     </div>
 
     <p class="small muted" style="margin:-12px 0 24px">
-      当前显示 <b id="pCount" style="color:var(--red)">0</b> 份档案 · 点击卡片查看完整口述
+      当前显示 <b id="pCount" style="color:var(--red)">0</b> 份档案 · 点击卡片阅读完整档案
     </p>
 
     <div class="people-grid" id="peopleGrid"></div>
   </div>
 </section>
 
-<section style="background:var(--paper-2);border-top:1px solid var(--line)">
-  <div class="wrap">
-    <div class="two-col">
-      <div class="reveal">
-        <p class="eyebrow">Composition</p>
-        <h2 class="h-sec">档案构成</h2>
-        <p class="lead">
-          目前共收录 <b id="pTotal" style="color:var(--red)">0</b> 份档案。
-          制衣厂主往往占多数——这既反映取样偏向，也反映这个群体的特殊性：
-          他们既是劳动者，也是小业主，在产业链上最被动，却承担了最大的风险敞口。
-        </p>
-        <div class="bars" id="pDist"></div>
-      </div>
-      <div class="reveal">
-        <p class="eyebrow">Cross Reading</p>
-        <h2 class="h-sec">可以怎么读这些卡片</h2>
-        <div class="card" style="margin-bottom:16px">
-          <h4>横向比：同一年份，不同处境</h4>
-          <p>2023 年春天，王芳在找新厂房，刘利的工位只坐满 6 个人，黄仁的机器已经埋在废墟里，
-             周代岚刚刚投下 30 万。把卡片按时间并排，能看到同一场拆违如何在不同人身上落出不同的形状。</p>
-        </div>
-        <div class="card" style="margin-bottom:16px">
-          <h4>纵向比：一条上升通道的两端</h4>
-          <p>从 15 岁入行的周康，到 48 岁的周蕙，再到 56 岁的刘远东——
-             「从制衣工到厂主」的通道曾经清晰可见，如今正在变得模糊。</p>
-        </div>
-        <div class="card">
-          <h4>读账目，也读语气</h4>
-          <p>「340 元」「7 元一件」「30 万货款」「每月 17000 元房租」——
-             数字之外，注意他们怎样描述未来：「干一天是一天」「赌运气」「离不开这里」。</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== 编辑指引（不影响展示，可随时删除本段） ===== -->
-<section>
+<!-- ===== 怎么读 ===== -->
+<section style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
   <div class="wrap">
     <div class="sec-head reveal">
-      <p class="eyebrow">How to Edit</p>
-      <h2 class="h-sec">怎么录入我自己的档案</h2>
-      <p class="lead">全部档案都集中在一个文件里，改完保存、刷新页面就能看到，不需要任何开发环境。</p>
+      <p class="eyebrow">Cross Reading</p>
+      <h2 class="h-sec">这四份档案怎么读</h2>
+      <p class="lead">样本很小，不足以代表十三万人。但小样本也有小样本的读法——把它当作四条位置不同的坐标，而不是一份统计。</p>
     </div>
-
-    <div class="guide reveal">
-      <details open>
-        <summary>第一步：打开数据文件</summary>
-        <div class="gbody">
-          <p class="lead" style="font-size:14px">
-            用记事本、VS Code 或任意编辑器打开项目里的
-            <code>assets/js/people-data.js</code>。文件顶部有完整的字段说明，
-            中间是 <code>const PEOPLE = [ ... ];</code>，每一对花括号 <code>{ }</code> 就是一份档案。
-          </p>
-        </div>
-      </details>
+    <div class="three-col">
+      <div class="card reveal">
+        <h4>横向比：同一片厂区，四种位置</h4>
+        <p>四人都来自湖北，却分别站在产业链的不同位置：日结散工、从长工转下来的散工、进厂的长期工、
+           接下父辈厂房的「厂二代」。同一场行情波动，落到每个人身上的形状并不一样。</p>
+      </div>
+      <div class="card reveal">
+        <h4>纵向比：一条通道的两端</h4>
+        <p>一头是四十五岁、做了二十多年散工的师傅；另一头是二十九岁、守着二十几台缝纫机的厂二代。
+           「从制衣工到厂主」这条通道曾经清晰可见，如今两端的人都在说同一句话：不知道还能走多久。</p>
+      </div>
+      <div class="card reveal">
+        <h4>读数字，也读语气</h4>
+        <p>「二十余年」「四年」「两百多平」「二十几台」是坐标；「厂家没生意，我们就没活干」
+           「哪怕熬秃了头，也未必能复刻当年的红火」是体温。数字定位置，语气定处境。</p>
+      </div>
     </div>
-
-    <div class="guide reveal" style="margin-top:16px">
-      <details>
-        <summary>第二步：照着模板改</summary>
-        <div class="gbody">
-          <p class="lead" style="font-size:14px">复制文件末尾的「空白模板」，粘贴进数组里填写即可：</p>
-<pre>{
-  id: 'p17',
-  name: '张某某',
-  cat: '制衣厂主',           // 只能用：制衣厂主 / 配套从业者 / 制衣工人 / 观察者
-  hometown: '湖北天门',
-  age: '42',
-  since: 2010,              // 来康鹭的年份，数字
-  years: 16,                // 在康鹭多少年，数字
-  tags: ['日结工', '夫妻档', '搬迁中'],
-  color: '',                // 留空则按身份自动配色
-  quote: '他原话说的一句话。',
-  story: '档案正文，可以写很长，需要换行用 &lt;br&gt;。',
-  meta: { '厂房面积': '200 ㎡', '工人': '8 人', '关键年份': '2019' },
-  source: '2026年3月 笔者于康鹭新招工广场访谈',
-  photo: ''                 // 有照片就填 'assets/img/p17.jpg'
-},</pre>
-          <p class="lead" style="font-size:14px;margin-top:14px">
-            <b>易错点：</b>请一律使用英文单引号 <code>'</code>；
-            正文里不要出现未转义的单引号；最后一条档案末尾不要多写逗号。
-          </p>
-        </div>
-      </details>
-    </div>
-
-    <div class="guide reveal" style="margin-top:16px">
-      <details>
-        <summary>第三步：可选的照片、分类与其他调整</summary>
-        <div class="gbody">
-          <ul>
-            <li><b>加照片：</b>把图片放进 <code>assets/img/</code>，然后在档案里填 <code>photo: 'assets/img/p01.jpg'</code>；不填则自动用姓氏首字生成圆形头像。</li>
-            <li><b>换配色：</b>在档案里填 <code>color: '#b3452f'</code>；不填则用身份默认色。</li>
-            <li><b>加新身份分类：</b>修改 <code>assets/js/people.js</code> 顶部的 <code>CATS</code> 与 <code>CAT_COLOR</code> 两处，然后档案里就可以用这个新分类。</li>
-            <li><b>关掉示例提示：</b>把 <code>assets/js/people.js</code> 顶部的 <code>SHOW_SAMPLE_NOTICE</code> 改成 <code>false</code>。</li>
-            <li><b>改时间轴、地图节点、词条：</b>编辑 <code>assets/js/data.js</code>，结构与人物档案类似。</li>
-          </ul>
-        </div>
-      </details>
-    </div>
-
-    <div class="card reveal" style="margin-top:22px">
-      <h4>批量录入：用 Excel 整理后一键导入</h4>
-      <p style="margin-bottom:16px">
-        如果档案较多，可以先下载 CSV 模板，在 Excel / WPS 里批量填好，再在这里导入：
-        页面会立即按新内容预览，确认后可一键导出 <code>people-data.js</code>，
-        覆盖原文件即可永久生效。整个过程都在本机浏览器里完成，不上传任何数据。
-      </p>
-      <div id="csvBox"></div>
-    </div>
+    <p class="small muted reveal" style="margin-top:28px">
+      档案不记录姓名、住址、厂名等可识别信息。处理原则见<a href="statement.html" style="color:var(--red)">声明与方法</a>。
+    </p>
   </div>
 </section>
-
-<!-- 弹窗 -->
-<div class="modal" id="pModal">
-  <div class="modal-bd"></div>
-  <div class="modal-box">
-    <div class="modal-hd"></div>
-    <div class="modal-ct"></div>
-  </div>
-</div>
 
 <footer class="site-foot">
   <div class="wrap foot-grid">
@@ -209,12 +123,12 @@
     </div>
     <div>
       <h5>引用与声明</h5>
-      <p>人物档案由课题组录入维护；内容仅用于教学与研究，转载请注明出处。</p>
+      <p>人物档案来自课题组田野访谈，为保护受访者已隐去可识别信息。内容仅用于教学与研究，转载请注明出处。</p>
     </div>
   </div>
   <div class="foot-bot">
     <span>© 2026 康鹭记忆 · Kanglu Memory Digital Humanities Project</span>
-    <span>数据整理自公开新闻报道与政府公开文件</span>
+    <span>田野访谈与公开资料整理</span>
   </div>
 </footer>
 
@@ -223,8 +137,7 @@
 <script src="assets/js/main.js"></script>
 <script src="assets/js/people.js"></script>
 <script>
-  const t = document.getElementById('pTotal');
-  if (t) t.textContent = PEOPLE.length;
+  initPeopleList();
 </script>
 </body>
 </html>
