@@ -1,0 +1,14 @@
+# 统一行尾：仓库内文本一律以 LF 存储
+# 作用：Windows 下编辑产生 CRLF 时，git 会自动归一化，不会再出现「改几行、diff 整个文件」的噪音
+* text=auto eol=lf
+
+# 二进制资源不做任何转换
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.gif  binary
+*.webp binary
+*.m4a  binary
+*.mp3  binary
+*.zip  binary
+*.xlsx binary
