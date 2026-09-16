@@ -261,12 +261,17 @@
           : EGRET_SVG);
   }
 
+  var POS_KEY = 'kl-mascot-pos';
+
   function build() {
-    var launch = document.createElement('button');
-    launch.className = 'ai-launch';
-    launch.type = 'button';
-    launch.setAttribute('aria-label', DEFAULTS.title);
-    launch.innerHTML = mascotHTML() + '<span class="ai-launch-txt">AI 问答</span>';
+    /* 形象本体：一个可拖动的浮标（不是侧边按钮） */
+    var wrap = document.createElement('div');
+    wrap.className = 'ai-bird-wrap';
+    wrap.setAttribute('role', 'button');
+    wrap.setAttribute('tabindex', '0');
+    wrap.setAttribute('aria-label', DEFAULTS.title + '（可拖动，点击展开对话）');
+    wrap.setAttribute('title', '拖动我 · 点我提问');
+    wrap.innerHTML = mascotHTML();
 
     var panel = document.createElement('aside');
     panel.className = 'ai-panel';
@@ -284,11 +289,11 @@
         '<button class="ai-send" type="submit">发送</button>' +
       '</form>';
 
-    document.body.appendChild(launch);
+    document.body.appendChild(wrap);
     document.body.appendChild(panel);
 
     els = {
-      launch: launch,
+      wrap: wrap,
       panel: panel,
       log: panel.querySelector('#aiLog'),
       presets: panel.querySelector('#aiPresets'),
@@ -306,7 +311,13 @@
       ? ''
       : '\n\n（当前未配置大模型接口，回答来自站内数据的本地检索。配置方法见 assets/js/ai-config.example.js）'));
 
-    els.launch.addEventListener('click', function () { toggle(true); });
+    restorePos();
+    initBirdDrag();
+    initBirdGaze();
+
+    wrap.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
     els.close.addEventListener('click', function () { toggle(false); });
     els.presets.addEventListener('click', function (e) {
       var b = e.target.closest('.ai-chip');
@@ -318,13 +329,129 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && els.panel.classList.contains('open')) toggle(false);
     });
+    window.addEventListener('resize', function () {
+      clampToView();
+      if (els.panel.classList.contains('open')) placePanel();
+    });
   }
 
-  function toggle(open) {
+  /* ---------- 拖动 ---------- */
+  function clampToView() {
+    var w = els.wrap.offsetWidth, h = els.wrap.offsetHeight;
+    var x = Math.max(6, Math.min(window.innerWidth - w - 6, els.wrap.offsetLeft));
+    var y = Math.max(6, Math.min(window.innerHeight - h - 6, els.wrap.offsetTop));
+    els.wrap.style.left = x + 'px';
+    els.wrap.style.top = y + 'px';
+  }
+
+  function savePos() {
+    try {
+      localStorage.setItem(POS_KEY, JSON.stringify({
+        x: els.wrap.offsetLeft, y: els.wrap.offsetTop
+      }));
+    } catch (e) { /* file:// 下 localStorage 可能不可用，忽略 */ }
+  }
+
+  function restorePos() {
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem(POS_KEY) || 'null'); } catch (e) { p = null; }
+    if (p && typeof p.x === 'number' && typeof p.y === 'number') {
+      els.wrap.style.left = p.x + 'px';
+      els.wrap.style.top = p.y + 'px';
+      els.wrap.style.right = 'auto';
+      els.wrap.style.bottom = 'auto';
+      clampToView();
+    }
+  }
+
+  function initBirdDrag() {
+    var wrap = els.wrap;
+    var dragging = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+    wrap.addEventListener('pointerdown', function (e) {
+      if (e.button != null && e.button !== 0) return;
+      dragging = true; moved = false;
+      sx = e.clientX; sy = e.clientY;
+      var r = wrap.getBoundingClientRect();
+      ox = r.left; oy = r.top;
+      wrap.style.left = ox + 'px'; wrap.style.top = oy + 'px';
+      wrap.style.right = 'auto'; wrap.style.bottom = 'auto';
+      wrap.classList.add('dragging');
+      try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    wrap.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;  // 先判断是拖动还是点击
+      moved = true;
+      wrap.style.left = (ox + dx) + 'px';
+      wrap.style.top = (oy + dy) + 'px';
+    });
+
+    function end(e) {
+      if (!dragging) return;
+      dragging = false;
+      wrap.classList.remove('dragging');
+      try { wrap.releasePointerCapture(e.pointerId); } catch (err) {}
+      if (moved) { clampToView(); savePos(); }
+      else { toggle(); }            // 没移动 = 点击 → 开合对话框
+    }
+    wrap.addEventListener('pointerup', end);
+    wrap.addEventListener('pointercancel', function (e) {
+      if (!dragging) return;
+      dragging = false; wrap.classList.remove('dragging');
+    });
+  }
+
+  /* ---------- 头跟随鼠标 ---------- */
+  function initBirdGaze() {
+    var head = els.wrap.querySelector('.ai-bird-head');
+    if (!head) return;
+    var mx = -1, my = -1, raf = 0;
+
+    function apply() {
+      raf = 0;
+      var r = els.wrap.getBoundingClientRect();
+      if (mx < 0) return;
+      /* 头部在图形中的大致位置：偏右上 */
+      var hx = r.left + r.width * 0.70;
+      var hy = r.top + r.height * 0.30;
+      var dx = mx - hx, dy = my - hy;
+      var d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      var amp = Math.min(4.5, d / 42);          // 越近位移越小，避免头部跳出去
+      head.style.transform = 'translate(' + (dx / d * amp).toFixed(2) + 'px,'
+        + (dy / d * amp).toFixed(2) + 'px)';
+      els.wrap.classList.toggle('flip', dx < -8); // 鼠标到左边就转身
+    }
+
+    window.addEventListener('mousemove', function (e) {
+      mx = e.clientX; my = e.clientY;
+      if (!raf) raf = requestAnimationFrame(apply);
+    }, { passive: true });
+  }
+
+  /* ---------- 小对话框：贴着小白鹭弹出 ---------- */
+  function placePanel() {
+    var r = els.wrap.getBoundingClientRect();
+    var pw = els.panel.offsetWidth, ph = els.panel.offsetHeight;
+    var left = r.right - pw;
+    left = Math.max(12, Math.min(window.innerWidth - pw - 12, left));
+    var top = r.top - ph - 14;                  // 优先放在小鸟上方
+    if (top < 12) top = Math.min(r.bottom + 14, window.innerHeight - ph - 12);
+    els.panel.style.left = left + 'px';
+    els.panel.style.top = Math.max(12, top) + 'px';
+    els.panel.style.right = 'auto';
+    els.panel.style.bottom = 'auto';
+  }
+
+  function toggle(force) {
+    var open = force == null ? !els.panel.classList.contains('open') : force;
+    if (open) placePanel();
     els.panel.classList.toggle('open', open);
     els.panel.setAttribute('aria-hidden', open ? 'false' : 'true');
-    document.documentElement.classList.toggle('ai-open', open);
-    if (open) setTimeout(function () { els.input.focus(); }, 260);
+    els.wrap.classList.toggle('asking', open);
+    if (open) setTimeout(function () { els.input.focus(); }, 240);
   }
 
   function bubble(who, text) {
