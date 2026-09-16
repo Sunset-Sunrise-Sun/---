@@ -465,44 +465,68 @@
     });
   }
 
-  /* ---------- 头朝鼠标 ---------- */
-  /* 不是简单平移：以颈部为轴做旋转（歪头看你），光标在下方时略微低头；
-     光标移到左侧时整体转身，转身后旋转方向要跟着取反，否则会"拧着脖子"看。 */
+  /* ---------- 头一直对准鼠标（几何瞄准 + 每帧缓动） ----------
+     要点一「对准」：头的喙在图形里朝右，所以要让喙指向鼠标，
+       局部旋转角就是「头 → 鼠标」的方位角；鼠标绕到身后时先转身，
+       再把屏幕方向折算进镜像后的局部坐标系（镜像下角度是 180-ang）。
+     要点二「丝滑」：不在 mousemove 里直接写死角度，而是维护当前值与目标值，
+       用一条持续的 requestAnimationFrame 逐帧插值靠拢，收敛后自动停下。 */
   function initBirdGaze() {
     var head = els.wrap.querySelector('.ai-bird-head');
     if (!head) return;
-    var mx = -1, my = -1, raf = 0;
+    var mx = -1, my = -1;
+    var cur = { tx: 0, ty: 0, deg: 0 };
+    var tgt = { tx: 0, ty: 0, deg: 0 };
+    var running = false;
+    var MAX_DEG = 60;      /* 头相对身体能转多少度 */
+    var EASE = 0.18;       /* 每帧向目标靠拢的比例：越小越绵、越大越跟手 */
 
-    function apply() {
-      raf = 0;
+    function wrap180(a) {
+      while (a > 180) a -= 360;
+      while (a < -180) a += 360;
+      return a;
+    }
+
+    function aim() {
       if (mx < 0) return;
       var r = els.wrap.getBoundingClientRect();
-      var hx = r.left + r.width * 0.70;   /* 头部大致位置：偏右上 */
-      var hy = r.top + r.height * 0.30;
+      var hx = r.left + r.width * 0.68;   /* 旋转轴大致在颈部 */
+      var hy = r.top + r.height * 0.32;
       var dx = mx - hx, dy = my - hy;
       var d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      var ang = Math.atan2(dy, dx) * 180 / Math.PI;   /* 屏幕坐标：0=右，90=下，±180=左 */
+
+      /* 鼠标绕到身后就转身。94/86 的差是迟滞，避免在正后方来回翻转抖动 */
       var flipped = els.wrap.classList.contains('flip');
-      /* 用叠加模型而不是方位角：
-         方位角在"鼠标与头同高"时恒为 0，横向移动完全看不出反应（这就是之前"头不转"的原因）。
-         改为「横向偏移 → 歪头角度」+「纵向偏移 → 颔首角度」，横向一动就有反馈。
-         幅度取到 ±24°/±9°，是为了"一眼能看见"——早先 ±13° 实际只有两三度，等于没转。 */
-      var localX = flipped ? -dx : dx;
-      var amp = Math.min(9, d / 22);
-      var tx = (localX / d) * amp, ty = (dy / d) * amp;
-      var rot = Math.max(-24, Math.min(24, localX / 22));   /* 横向：左右歪头 */
-      var tilt = Math.max(-9, Math.min(9, dy / 26));        /* 纵向：抬头/低头 */
-      var deg = Math.max(-28, Math.min(28, rot + tilt));
+      if (!flipped && Math.abs(ang) > 94) { els.wrap.classList.add('flip'); flipped = true; }
+      else if (flipped && Math.abs(ang) < 86) { els.wrap.classList.remove('flip'); flipped = false; }
 
-      head.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) '
-        + 'rotate(' + deg.toFixed(1) + 'deg)';
+      tgt.deg = Math.max(-MAX_DEG, Math.min(MAX_DEG, flipped ? wrap180(180 - ang) : ang));
+      var amp = Math.min(6, d / 55);
+      tgt.tx = (dx / d) * amp;
+      tgt.ty = (dy / d) * amp;
+    }
 
-      els.wrap.classList.toggle('flip', dx < -10 && Math.abs(dy) < 260);
+    function loop() {
+      cur.tx += (tgt.tx - cur.tx) * EASE;
+      cur.ty += (tgt.ty - cur.ty) * EASE;
+      cur.deg += (tgt.deg - cur.deg) * EASE;
+      head.style.transform = 'translate(' + cur.tx.toFixed(2) + 'px,' + cur.ty.toFixed(2) + 'px) '
+        + 'rotate(' + cur.deg.toFixed(2) + 'deg)';
+      var settled = Math.abs(tgt.deg - cur.deg) < 0.15
+        && Math.abs(tgt.tx - cur.tx) < 0.1 && Math.abs(tgt.ty - cur.ty) < 0.1;
+      if (settled) { running = false; return; }
+      requestAnimationFrame(loop);
     }
 
     window.addEventListener('mousemove', function (e) {
       mx = e.clientX; my = e.clientY;
-      if (!raf) raf = requestAnimationFrame(apply);
+      aim();
+      if (!running) { running = true; requestAnimationFrame(loop); }
     }, { passive: true });
+
+    /* 供调试：读出当前瞄准状态 */
+    els.wrap.klGaze = function () { return { cur: cur, tgt: tgt, flip: els.wrap.classList.contains('flip') }; };
   }
 
   /* ---------- 气泡：随内容平滑长大 ---------- */

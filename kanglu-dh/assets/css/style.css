@@ -1012,7 +1012,9 @@ section.has-band{ padding-top:0; }
   cursor:grab; touch-action:none; user-select:none;
   display:grid; place-items:center;
   filter:drop-shadow(0 8px 18px rgba(28,26,23,.20));
-  transition:filter .25s ease;
+  /* transform 只用于转身（scaleX），给它加过渡：转身时有"翻过去"的过程而不是瞬间镜像。
+     位置用的是 left/top，不受这里影响。 */
+  transition:filter .25s ease, transform .34s cubic-bezier(.36,.15,.28,1);
   -webkit-tap-highlight-color:transparent;
 }
 .ai-bird-wrap:hover{ filter:drop-shadow(0 12px 24px rgba(28,26,23,.26)); }
