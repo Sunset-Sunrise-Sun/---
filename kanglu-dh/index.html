@@ -146,16 +146,37 @@
   </div>
 </section>
 
-<!-- ============ 时间轴预览 ============ -->
-<section class="tight" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+<!-- ============ 发展历程 ============ -->
+<section class="tight" id="history" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
   <div class="wrap">
     <div class="sec-head reveal">
       <p class="eyebrow">Chronology</p>
-      <h2 class="h-sec">三十余年，一条时间线</h2>
-      <p class="lead">从自发形成的布匹摊位，到全中国最贵的城中村改造项目。灰色节点表示历史阶段，红色节点表示仍在延续的日常。</p>
+      <h2 class="h-sec">发展历程</h2>
+      <p class="lead">从中山大学南门前的零散摊位，到广州中心城区投资额最大的旧改项目——四十余年，六个阶段。</p>
     </div>
-    <ul class="tl" id="tlPreview"></ul>
-    <div class="tl-more"><a class="btn ghost" href="background.html#chronicle">查看完整编年（16 条）</a></div>
+
+    <ul class="tl tl-hist" id="hist"></ul>
+
+    <div class="hist-coda">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Field Echoes</p>
+        <h3 class="h-sec">田野回声</h3>
+        <p class="lead">2026 年 8 月，我们在康鹭走访了十余位制衣从业者和居民。当问及旧改时，他们给出的回答出奇地一致。</p>
+      </div>
+
+      <div class="coda-quotes reveal">
+        <blockquote class="coda-quote">一直在说，但只拆了那边一点点。</blockquote>
+        <blockquote class="coda-quote">听说要拆，但还早。</blockquote>
+        <blockquote class="coda-quote">也不知道什么时候拆到我们。</blockquote>
+      </div>
+
+      <div class="coda-body reveal">
+        <p>官方的时间表是清晰的——首期复建地块已动工，预计 2030 年全面建成。但在村庄的日常里，缝纫机声依旧，招工市场依旧，人依旧在流动。旧改是悬在头顶的预期，而不是脚下的现实。</p>
+        <p>这种认知的落差，或许才是康鹭此刻最真实的写照。它不是等待被拆除的空城，而是一个仍在运转的、等待着未知命运的活态社区。</p>
+      </div>
+
+      <div class="tl-more"><a class="btn ghost" href="background.html#chronicle">查看背景资料中的完整编年（16 条）</a></div>
+    </div>
   </div>
 </section>
 
@@ -247,7 +268,7 @@
   document.getElementById('recPeople').textContent = PEOPLE.length;
   document.getElementById('recPoi').textContent = POIS.length;
   renderStats('#stats');
-  renderTimeline('#tlPreview', 6);
+  renderHistory('#hist');
 
   // 人口与产业构成
   const BARS = [

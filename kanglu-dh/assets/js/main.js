@@ -114,6 +114,22 @@ function renderTimeline(sel, limit){
     </li>`).join('');
 }
 
+/* ---------- 发展历程（首页纵向时间轴） ---------- */
+/* 与 renderTimeline 的区别：时段标题在左轴外侧，正文可多段，
+   最后一段用 now 标记为「进行时」，节点填充朱红。 */
+function renderHistory(sel){
+  const box = $(sel); if (!box) return;
+  box.innerHTML = HISTORY.map(h => `
+    <li class="tl-item reveal${h.now ? ' now' : ''}">
+      <span class="tl-year">${h.era}</span>
+      <span class="tl-dot"></span>
+      <div class="tl-body">
+        <h4>${h.title}</h4>
+        ${h.body.map(p => `<p>${p}</p>`).join('')}
+      </div>
+    </li>`).join('');
+}
+
 /* ---------- 产业链 ---------- */
 const CHAIN_ICON = {
   fabric:'<path d="M3 6c3-2 6 2 9 0s6-2 9 0M3 12c3-2 6 2 9 0s6-2 9 0M3 18c3-2 6 2 9 0s6-2 9 0"/>',

@@ -735,3 +735,39 @@ section[id]{ scroll-margin-top:84px; }
 @media (max-width:1080px){
   .intro-grid{ grid-template-columns:1fr; gap:34px; }
 }
+
+/* ============================================================
+   发展历程（复用 .tl 纵向时间轴：左轴 + 右卡片，只调栏宽与卡片细节）
+   ============================================================ */
+/* 桌面端加宽时段栏，容纳「1980s末–1990s」这类中西混排；
+   放在 min-width 查询内，760px 以下继续沿用 .tl 的堆叠式布局 */
+@media (min-width:761px){
+  .tl-hist::before{ left:136px; }
+  .tl-hist .tl-item{ padding-left:186px; }
+  .tl-hist .tl-year{ width:118px; font-size:13px; }
+  .tl-hist .tl-dot{ left:130px; }
+}
+.tl-hist .tl-item{ padding-bottom:26px; }
+.tl-hist .tl-body{ padding:20px 24px 22px; }
+.tl-hist .tl-body h4{ font-size:20px; margin-bottom:10px; }
+.tl-hist .tl-body p + p{ margin-top:11px; }
+.tl-hist .tl-item.now .tl-dot{ background:var(--red); box-shadow:0 0 0 4px rgba(179,69,47,.15); }
+.tl-hist .tl-item.now .tl-body{ border-color:#dcc7a9; }
+
+/* 田野回声 */
+.hist-coda{ margin-top:64px; }
+.hist-coda .sec-head{ margin-bottom:26px; }
+.coda-quotes{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:28px; }
+.coda-quote{
+  margin:0; padding:18px 20px;
+  background:var(--paper); border:1px solid var(--line); border-left:3px solid var(--red);
+  border-radius:0 var(--radius) var(--radius) 0;
+  font-family:var(--serif); font-size:15px; color:var(--ink); line-height:1.8;
+}
+.coda-body p{ font-size:15px; color:var(--ink-2); line-height:2; margin:0 0 14px; }
+.coda-body p:last-child{ margin-bottom:0; }
+
+@media (max-width:760px){
+  .coda-quotes{ grid-template-columns:1fr; gap:12px; }
+  .tl-hist .tl-body{ padding:18px 18px 20px; }
+}
