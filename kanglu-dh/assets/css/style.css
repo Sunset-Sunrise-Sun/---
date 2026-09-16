@@ -45,11 +45,27 @@ body{
   font-size:15px;
   line-height:1.85;
   -webkit-font-smoothing:antialiased;
-  /* 纸纹：极淡的网格 */
+  /* ------------------------------------------------------------
+     全站背景（不铺照片）
+     思路：影像带已经是页面上唯一的「照片时刻」，全站再铺图会与它互相削弱。
+     所以这里只用纸的材质语言，让整站像同一张纸：
+       ① 两处极淡的环境光（视口固定，滚动时不移动）——顶部一点暖、左下一点冷，
+          用来给纯平的大面积留白一点温度；
+       ② 宣纸帘纹：每 26px 一道竖向细纹；
+       ③ 纸纤维：每 34px 一道横向更疏的细纹；
+       ④ 保留原有的 32px 网格骨架，作为版面的「底图坐标」。
+     材质层用默认的 scroll，随内容一起走，才像"在一张纸上滚动"而不是贴了层滤镜。
+     ------------------------------------------------------------ */
   background-image:
-    linear-gradient(rgba(28,26,23,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28,26,23,.018) 1px, transparent 1px);
-  background-size:32px 32px;
+    radial-gradient(1100px 520px at 50% -8%, rgba(176,134,59,.055), transparent 68%),
+    radial-gradient(900px 560px at 4% 106%, rgba(47,107,125,.045), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(139,105,20,.024) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg, rgba(139,105,20,.016) 0 1px, transparent 1px 34px),
+    linear-gradient(rgba(28,26,23,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28,26,23,.012) 1px, transparent 1px);
+  background-repeat:no-repeat, no-repeat, repeat, repeat, repeat, repeat;
+  background-size:auto, auto, auto, auto, 32px 32px, 32px 32px;
+  background-attachment:fixed, fixed, scroll, scroll, scroll, scroll;
 }
 img{ max-width:100%; display:block; }
 a{ color:inherit; text-decoration:none; }
