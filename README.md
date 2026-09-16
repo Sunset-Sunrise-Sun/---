@@ -47,8 +47,18 @@ DEVNOTES.md         开发日志（排查记录、验证方法、待办）
 
 **关于密钥**：本地演示可以直连，密钥写在 `ai-config.local.js`（该文件已被 gitignore，
 不会入库、也不会被部署）。线上要让 AI 真正工作，必须走一个持密钥的代理——
-`ai-config.example.js` 里有一份可直接用的 Cloudflare Worker 示例。
+代码与部署步骤见 [`worker/`](worker/README.md)，里面有一份**已在本地跑通的** Cloudflare Worker
+（预检、正常调用、流式透传、来源白名单都验过）。
 **不要把密钥写进会发布的文件里。**
+
+## 分享给别人看
+
+**开启 GitHub Pages**（仓库 Settings → Pages → Source 选 `main` / `(root)`），
+链接即为 `https://sunset-sunrise-sun.github.io/---/`。
+
+线上没有密钥文件，所以分享出去的版本里 AI 会走「本地检索」模式（界面、动效、
+拖动、转头、气泡都正常）。要让线上的 AI 也接真实模型，先把 `worker/` 部署好，
+再把 Worker 地址填进 `ai-config.js` 的 `proxyUrl`，然后重新推送。
 
 ## 说明
 
