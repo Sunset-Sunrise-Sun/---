@@ -866,7 +866,10 @@ section.has-band{ padding-top:0; }
    ============================================================ */
 .side-nav{
   position:fixed; left:14px; top:50%; transform:translateY(-50%); z-index:60;
-  display:flex; flex-direction:column; padding:14px 18px 14px 13px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  /* 给一个明确高度并让 7 项均分，轴才拉得开；否则按内容高度只有 260px 左右，显得小气 */
+  height:clamp(340px, 58vh, 560px);
+  padding:20px 16px 20px 12px;
   /* 导航是固定定位、垂直居中，必然会有内容（尤其是影像带）落到它背后，
      所以需要一块纸色底板，否则深色文字压在照片上完全读不清 */
   background:rgba(250,247,240,.93);
@@ -876,13 +879,13 @@ section.has-band{ padding-top:0; }
   backdrop-filter:blur(6px) saturate(150%);
 }
 .side-nav .track{
-  position:absolute; left:19px; top:20px; bottom:20px; width:2px;
+  position:absolute; left:20px; top:30px; bottom:30px; width:2px;
   background:rgba(121,112,95,.28); border-radius:1px; overflow:hidden;
 }
 .side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
 .side-nav a{
   display:flex; align-items:center; gap:12px;
-  padding:10px 0; font-size:13.5px; color:var(--ink-2); white-space:nowrap;
+  padding:0; font-size:13.5px; color:var(--ink-2); white-space:nowrap;
 }
 .side-nav a::before{
   content:""; position:relative; z-index:1; flex:none;
@@ -905,7 +908,7 @@ section.has-band{ padding-top:0; }
      1440px 视口 → 1080 宽正文 → 余量 180px ✓
      1680px 视口 → 1220 宽正文 → 余量 230px ✓（回到原宽度） */
 @media (min-width:1200px){
-  body.has-sidenav{ --maxw:940px; }
+  body.has-sidenav{ --maxw:920px; }
   .subnav-wrap{ display:none; }
 }
 @media (min-width:1440px){ body.has-sidenav{ --maxw:1080px; } }
