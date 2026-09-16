@@ -673,6 +673,11 @@
   loadScript('assets/js/ai-config.js')
     .then(function () {
       var pub = window.KL_AI || {};
+      /* 含密钥的本地配置只在本地尝试加载（file:// 或 localhost）。
+         线上必然没有这个文件，加载只会多一条无用的 404 报错。 */
+      var host = location.hostname;
+      var isLocal = !host || host === 'localhost' || host === '127.0.0.1' || host === '::1';
+      if (!isLocal) return Object.assign({}, DEFAULTS, pub);
       return loadScript('assets/js/ai-config.local.js').then(function () {
         var loc = window.KL_AI || {};
         return Object.assign({}, DEFAULTS, pub, loc);
