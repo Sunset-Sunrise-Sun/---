@@ -331,7 +331,7 @@
     });
     window.addEventListener('resize', function () {
       clampToView();
-      if (els.panel.classList.contains('open')) placePanel();
+      if (els.panel.classList.contains('open')) { placePanel(); fitPanel(); }
     });
   }
 
@@ -404,7 +404,9 @@
     });
   }
 
-  /* ---------- 头跟随鼠标 ---------- */
+  /* ---------- 头朝鼠标 ---------- */
+  /* 不是简单平移：以颈部为轴做旋转（歪头看你），光标在下方时略微低头；
+     光标移到左侧时整体转身，转身后旋转方向要跟着取反，否则会"拧着脖子"看。 */
   function initBirdGaze() {
     var head = els.wrap.querySelector('.ai-bird-head');
     if (!head) return;
@@ -412,17 +414,25 @@
 
     function apply() {
       raf = 0;
-      var r = els.wrap.getBoundingClientRect();
       if (mx < 0) return;
-      /* 头部在图形中的大致位置：偏右上 */
-      var hx = r.left + r.width * 0.70;
+      var r = els.wrap.getBoundingClientRect();
+      var hx = r.left + r.width * 0.70;   /* 头部大致位置：偏右上 */
       var hy = r.top + r.height * 0.30;
       var dx = mx - hx, dy = my - hy;
       var d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      var amp = Math.min(4.5, d / 42);          // 越近位移越小，避免头部跳出去
-      head.style.transform = 'translate(' + (dx / d * amp).toFixed(2) + 'px,'
-        + (dy / d * amp).toFixed(2) + 'px)';
-      els.wrap.classList.toggle('flip', dx < -8); // 鼠标到左边就转身
+      /* 用几何角度而非启发式：头在图形里本来就是朝右画的，
+         所以「头 → 鼠标」的方位角就是它该旋转的角度。
+         转身后局部坐标的 x 要取反，否则会"拧着脖子"看。 */
+      var localX = flipped ? -dx : dx;
+      var amp = Math.min(4, d / 48);
+      var tx = (localX / d) * amp, ty = (dy / d) * amp;
+      var ang = Math.atan2(dy, localX) * 180 / Math.PI;
+      var rot = Math.max(-14, Math.min(14, ang));
+
+      head.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) '
+        + 'rotate(' + rot.toFixed(1) + 'deg)';
+
+      els.wrap.classList.toggle('flip', dx < -10 && Math.abs(dy) < 260);
     }
 
     window.addEventListener('mousemove', function (e) {
@@ -431,23 +441,54 @@
     }, { passive: true });
   }
 
-  /* ---------- 小对话框：贴着小白鹭弹出 ---------- */
+  /* ---------- 气泡：随内容平滑长大 ---------- */
+  /* 高度不能直接用 auto 过渡，所以先钉住当前高度、下一帧再给目标高度，
+     由 CSS 的 height 过渡负责补间 —— 长文进来时是"吹大"而不是"跳大"。 */
+  function fitPanel() {
+    var panel = els.panel;
+    if (!panel.classList.contains('open')) return;
+    var chrome = panel.offsetHeight - els.log.offsetHeight;   /* 头 + 预设 + 输入框 */
+    var maxH = Math.min(window.innerHeight * 0.72, 600);
+    var want = Math.max(200, Math.min(maxH, els.log.scrollHeight + chrome + 2));
+    var cur = panel.offsetHeight;
+    if (Math.abs(want - cur) < 2) return;
+    panel.style.height = cur + 'px';
+    requestAnimationFrame(function () { panel.style.height = want + 'px'; });
+  }
+
+  var fitRaf = 0;
+  function scheduleFit() {
+    if (fitRaf) return;
+    fitRaf = requestAnimationFrame(function () { fitRaf = 0; fitPanel(); });
+  }
+
+  /* ---------- 小气泡对话框：贴着小白鹭弹出 ---------- */
   function placePanel() {
     var r = els.wrap.getBoundingClientRect();
     var pw = els.panel.offsetWidth, ph = els.panel.offsetHeight;
     var left = r.right - pw;
     left = Math.max(12, Math.min(window.innerWidth - pw - 12, left));
-    var top = r.top - ph - 14;                  // 优先放在小鸟上方
-    if (top < 12) top = Math.min(r.bottom + 14, window.innerHeight - ph - 12);
+    var top = r.top - ph - 14;                  /* 优先放在小鸟上方 */
+    var below = top < 12;
+    if (below) top = Math.min(r.bottom + 14, window.innerHeight - ph - 12);
     els.panel.style.left = left + 'px';
     els.panel.style.top = Math.max(12, top) + 'px';
     els.panel.style.right = 'auto';
     els.panel.style.bottom = 'auto';
+    /* 小尾巴指向小鸟中心 */
+    els.panel.classList.toggle('tail-top', below);
+    els.panel.classList.toggle('tail-bottom', !below);
+    var tailX = Math.max(20, Math.min(pw - 34, r.left + r.width / 2 - left - 8));
+    els.panel.style.setProperty('--tail-x', tailX + 'px');
   }
 
   function toggle(force) {
     var open = force == null ? !els.panel.classList.contains('open') : force;
-    if (open) placePanel();
+    if (open) {
+      els.panel.style.height = 'auto';       /* 先按内容量一次，再交给过渡 */
+      placePanel();
+      fitPanel();
+    }
     els.panel.classList.toggle('open', open);
     els.panel.setAttribute('aria-hidden', open ? 'false' : 'true');
     els.wrap.classList.toggle('asking', open);
@@ -460,6 +501,7 @@
     d.textContent = text;
     els.log.appendChild(d);
     els.log.scrollTop = els.log.scrollHeight;
+    scheduleFit();
     return d;
   }
 
@@ -480,6 +522,7 @@
         if (first) { out.textContent = ''; out.classList.remove('typing'); first = false; }
         out.textContent += piece;
         els.log.scrollTop = els.log.scrollHeight;
+        scheduleFit();          /* 逐字进来时气泡跟着"吹大" */
       },
       function (full) {
         out.classList.remove('typing');
