@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>声明与方法 · 康鹭记忆</title>
-<meta name="description" content="康鹭记忆项目声明：资料来源与影像使用、隐私与伦理处理、数据口径、AI 使用说明、地图声明、开发过程中的技术问题与解决。">
+<meta name="description" content="康鹭记忆项目声明：资料来源与影像使用、隐私与伦理处理、数据统计口径、AI 使用说明、地图性质与版权引用。">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body data-page="statement">
@@ -32,8 +32,7 @@
     <h1>声明与方法</h1>
     <p class="lead">
       本站是一项数字人文教学研究项目的成果展示。本页说明资料与影像的来源、隐私与伦理处理方式、
-      数据统计口径、AI 工具的使用边界，以及开发过程中遇到的问题与我们的解决办法——把「怎么做的」
-      和「为什么这么做」一并留下，供评审与后续使用者查证。
+      数据统计口径与 AI 工具的使用边界，供评审与后续使用者查证。
     </p>
   </div>
 </section>
@@ -173,70 +172,12 @@
   </div>
 </section>
 
-<!-- ============ 五、技术问题与解决 ============ -->
-<section class="tight">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <p class="eyebrow">Engineering Notes</p>
-      <h2 class="h-sec">五、开发过程中的问题与解决</h2>
-      <p class="lead">
-        以下问题都是在本次改造中实际发生并被逐一定位的。记录在此，一是便于复核，二是提醒后来者少走同样的弯路。
-      </p>
-    </div>
-    <div class="gloss">
-      <dl class="gloss-item reveal">
-        <dt><span></span>占比条／分布条恒为空</dt>
-        <dd>现象：无论数据多少，进度条都只有底轨、没有填充。<br>
-          原因：<code>.bar-track</code> 与 <code>.bar-fill</code> 都是 <code>&lt;span&gt;</code>，而行内元素的 <code>width</code>／<code>height</code> 不生效。
-          <code>.bar-track</code> 作为 grid 子项会被自动块化所以底轨可见，<code>.bar-fill</code> 不是 grid 子项则始终是行内元素。<br>
-          解决：两者显式 <code>display:block</code>；同时把原本观察「零宽度的 <code>.bar-fill</code>」改为观察有真实面积的 <code>.bar-track</code>，阈值降为 0。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>封面图完全不显示</dt>
-        <dd>现象：封面版式正确，但图片区域一片空底。<br>
-          原因：入场动画把 <code>opacity</code> 从 0 拉到 1，一旦动画因任何原因未执行，封面图将<b>永久不可见</b>。<br>
-          解决：封面图只做 <code>transform</code> 缩放推进，不参与透明度开场——即使动画被禁用，图片依然可见。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>滚动监听的重复创建</dt>
-        <dd>原因：筛选或重新渲染后再次调用初始化函数，会反复新建 <code>IntersectionObserver</code>，已触发过的元素可能不再被观察。<br>
-          解决：改为单例 observer + 幂等标记，重复调用安全。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>锚点跳转被顶栏遮挡</dt>
-        <dd>原因：顶栏是 66px 高的 sticky 定位，锚点会把标题顶到顶栏底下。<br>
-          解决：<code>section[id]{ scroll-margin-top:84px; }</code>。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>仓库里 CRLF 与 LF 混存</dt>
-        <dd>原因：初始提交时转换配置与后续配置不一致，导致被编辑过的文件整份以 CRLF 入库，
-          表现为「只改几行却 diff 整个文件」，无法逐行审阅。<br>
-          解决：新增 <code>.gitattributes</code>（<code>* text=auto eol=lf</code>，二进制资源显式标注），并统一归一化。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>代码编辑器的残留属性</dt>
-        <dd>原因：人物档案页曾被可视化编辑器处理过，留下 154 处 <code>data-page-node-id</code> 属性，文件体积近乎翻倍。<br>
-          解决：清理全部残留属性（17.1KB → 7.8KB）。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>无障碍与动效偏好</dt>
-        <dd>全站对系统「减少动态效果」设置作兜底：开启后关闭入场动画、过渡与平滑滚动，内容直接呈现。</dd>
-      </dl>
-      <dl class="gloss-item reveal">
-        <dt><span></span>移动端下拉菜单对比度</dt>
-        <dd>原因：顶栏在封面上方为透明态（白字），而移动端下拉菜单是浅色实底，白字落在浅底上不可读。<br>
-          解决：断点内把透明态下的菜单文字改回深色。</dd>
-      </dl>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 六、引用与联系 ============ -->
+<!-- ============ 五、引用与联系 ============ -->
 <section class="tight" style="background:var(--paper-2);border-top:1px solid var(--line)">
   <div class="wrap">
     <div class="sec-head reveal">
       <p class="eyebrow">Citation</p>
-      <h2 class="h-sec">六、版权、引用与联系</h2>
+      <h2 class="h-sec">五、版权、引用与联系</h2>
     </div>
     <div class="gloss">
       <dl class="gloss-item reveal">
