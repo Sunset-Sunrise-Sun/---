@@ -36,6 +36,19 @@
   - **根因**：同为命名管道限制。
   - **解决**：放宽沙箱后正常出图（策略改为 `danger-full-access` 后不再需要逐次申请）。
 
+### 1.2b github.com 直连会间歇性不通，推送要走本机代理
+
+- **现象**：`git push` 报 `Failed to connect to github.com:443 after 21063 ms: Could not connect to server`，
+  但同一次会话里 `api.github.com` 与 `web_fetch` 都正常。
+- **定位**：`curl.exe -x http://127.0.0.1:7890 https://github.com` 返回 200，而直连失败 →
+  属对 github.com:443 的选择性阻断（时通时不通）。
+- **解决**：推送时挂本机代理：
+  ```powershell
+  git -c http.proxy=http://127.0.0.1:7890 push origin main
+  ```
+  之所以用一次性 `-c` 而不写进仓库配置：代理没开时配置会导致推送直接失败。
+  建议的推送脚本写法是「先直连，失败再走代理」。
+
 ### 1.3 PowerShell 5.1 按 ANSI 读取无 BOM 的 `.ps1`
 
 - **现象**：脚本里的中文变成乱码（`缂╃暐KB`），并报 `Unexpected token ')'`、`Missing '=' operator` 等一堆解析错误。
