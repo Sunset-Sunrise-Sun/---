@@ -899,13 +899,18 @@ section.has-band{ padding-top:0; }
 }
 .side-nav a.on span{ color:var(--red); font-weight:700; }
 
-/* 断点取 1340px：此时居中余量为 (1340-1060)/2 = 140px，
-   刚好容得下约 124px 宽的导航面板，不会压到正文 */
-@media (min-width:1340px){
-  body.has-sidenav{ --maxw:1060px; }
+/* 大屏：给页面让出装订线。
+   正文宽度分档放宽，保证每一档的居中余量都容得下约 124px 宽的导航面板：
+     1200px 视口 → 940 宽正文 → 余量 130px ✓
+     1440px 视口 → 1080 宽正文 → 余量 180px ✓
+     1680px 视口 → 1220 宽正文 → 余量 230px ✓（回到原宽度） */
+@media (min-width:1200px){
+  body.has-sidenav{ --maxw:940px; }
   .subnav-wrap{ display:none; }
 }
-@media (max-width:1339px){ .side-nav{ display:none; } }
+@media (min-width:1440px){ body.has-sidenav{ --maxw:1080px; } }
+@media (min-width:1680px){ body.has-sidenav{ --maxw:1220px; } }
+@media (max-width:1199px){ .side-nav{ display:none; } }
 
 @media (max-width:1080px){
   .feature, .feature.flip{ grid-template-columns:1fr; gap:26px; align-items:start; }
