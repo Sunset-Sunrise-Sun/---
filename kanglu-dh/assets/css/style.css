@@ -820,7 +820,7 @@ section.has-band{ padding-top:0; }
   font-family:var(--serif); font-weight:700; letter-spacing:.01em; line-height:1.3;
   font-size:clamp(26px, 3.4vw, 42px); color:var(--ink); margin:0 0 10px;
 }
-.band-sub{ font-size:15px; line-height:1.9; color:var(--ink-2); max-width:60ch; margin:0; }
+.band-sub{ font-size:16px; line-height:1.9; color:var(--ink-2); max-width:60ch; margin:0; }
 
 /* ② 错位图文：大图 + 侧栏文字（.flip 左右互换） */
 .feature{ display:grid; grid-template-columns:1.25fr .8fr; gap:48px; align-items:center; margin-top:60px; }
@@ -832,7 +832,7 @@ section.has-band{ padding-top:0; }
   border:1px solid var(--line); border-radius:var(--radius);
 }
 .feature-media figcaption{
-  margin-top:10px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3);
+  margin-top:11px; font-family:var(--mono); font-size:12px; letter-spacing:.03em; color:var(--ink-3);
 }
 .feature-body h3{ font-family:var(--serif); font-size:24px; margin:0 0 14px; }
 .feature-body p{ font-size:15px; line-height:2; color:var(--ink-2); margin:0 0 14px; }
@@ -857,45 +857,55 @@ section.has-band{ padding-top:0; }
 .panel-row{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:56px; }
 
 /* ============================================================
-   左侧竖排小节导航（大屏）+ 横排跳转条（小屏）
+   左侧竖排小节导航（大屏）
    ------------------------------------------------------------
-   竖排导航默认只显示轴与圆点（不带文字），悬停时展开标签；
-   轴上方到当前滚动位置之间填充朱红，作为阅读进度。
+   大屏（≥1320px）时给页面让出一条装订线：把 --maxw 收窄，
+   正文自动居中留出左侧余量，导航常驻显示、文字始终可见——
+   而不是靠悬停或压层去遮正文。
+   小屏回到横排跳转条（.subnav-wrap）。
    ============================================================ */
 .side-nav{
-  position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:60;
-  display:flex; flex-direction:column; padding:12px 0;
+  position:fixed; left:14px; top:50%; transform:translateY(-50%); z-index:60;
+  display:flex; flex-direction:column; padding:14px 18px 14px 13px;
+  /* 导航是固定定位、垂直居中，必然会有内容（尤其是影像带）落到它背后，
+     所以需要一块纸色底板，否则深色文字压在照片上完全读不清 */
+  background:rgba(250,247,240,.93);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  backdrop-filter:blur(6px) saturate(150%);
 }
 .side-nav .track{
-  position:absolute; left:6px; top:16px; bottom:16px; width:1px;
-  background:rgba(121,112,95,.24); border-radius:1px; overflow:hidden;
+  position:absolute; left:19px; top:20px; bottom:20px; width:2px;
+  background:rgba(121,112,95,.28); border-radius:1px; overflow:hidden;
 }
 .side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
 .side-nav a{
-  position:relative; display:flex; align-items:center; gap:12px;
-  padding:10px 0; font-size:12.5px; color:var(--ink-3); white-space:nowrap;
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0; font-size:13.5px; color:var(--ink-2); white-space:nowrap;
 }
 .side-nav a::before{
   content:""; position:relative; z-index:1; flex:none;
-  width:10px; height:10px; border-radius:50%;
-  /* 圆点必须有足够对比度：纸色填充 + 浅边落在纸色页面上会完全看不见 */
-  background:var(--paper); border:2px solid rgba(121,112,95,.42); transition:.25s;
+  width:13px; height:13px; border-radius:50%;
+  /* 圆点需要足够对比度：纸色填充 + 浅描边落在纸色页面上会完全看不见 */
+  background:var(--paper); border:2px solid rgba(121,112,95,.5); transition:.25s;
 }
-/* 标签默认隐藏，悬停整条导航才展开；加纸色底片，即使压住正文也可读 */
-.side-nav a span{
-  opacity:0; transform:translateX(-8px); pointer-events:none; transition:.25s;
-  font-family:var(--serif);
-  background:var(--paper); border:1px solid var(--line); border-radius:3px;
-  padding:3px 9px; box-shadow:var(--shadow-sm);
-}
-.side-nav:hover a span{ opacity:1; transform:none; }
-.side-nav a.on::before{ background:var(--red); border-color:var(--red); box-shadow:0 0 0 3px rgba(179,69,47,.13); }
-.side-nav a.on{ color:var(--red); }
+.side-nav a span{ font-family:var(--serif); transition:color .25s; }
 .side-nav a:hover::before{ border-color:var(--red); }
+.side-nav a:hover span{ color:var(--red); }
+.side-nav a.on::before{
+  background:var(--red); border-color:var(--red);
+  box-shadow:0 0 0 3px rgba(179,69,47,.16);
+}
+.side-nav a.on span{ color:var(--red); font-weight:700; }
 
-/* 只有横向余量足够时才显示，避免圆点压到正文 */
-@media (max-width:1299px){ .side-nav{ display:none; } }
-@media (min-width:1300px){ .subnav-wrap{ display:none; } }
+/* 断点取 1340px：此时居中余量为 (1340-1060)/2 = 140px，
+   刚好容得下约 124px 宽的导航面板，不会压到正文 */
+@media (min-width:1340px){
+  body.has-sidenav{ --maxw:1060px; }
+  .subnav-wrap{ display:none; }
+}
+@media (max-width:1339px){ .side-nav{ display:none; } }
 
 @media (max-width:1080px){
   .feature, .feature.flip{ grid-template-columns:1fr; gap:26px; align-items:start; }
