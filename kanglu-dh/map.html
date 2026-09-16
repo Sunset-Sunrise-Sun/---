@@ -26,7 +26,7 @@
   </div>
 </header>
 
-<section class="page-banner">
+<section class="page-banner page-banner--flush">
   <div class="wrap">
     <p class="crumb"><a href="index.html">首页</a> / 康鹭地图</p>
     <h1>康鹭地图</h1>
@@ -34,6 +34,23 @@
       这是一张<b>关系地图</b>，而不是测绘图。它不追求坐标准确，而是试图把供应、用工、出货、治理
       这四张网络如何折叠在同一平方公里之内画出来。点击任一节点，查看该处空间的田野记录。
     </p>
+  </div>
+</section>
+
+<!-- 影像带 -->
+<section class="has-band" style="padding-bottom:0">
+  <div class="band short">
+    <img class="band-img" src="assets/img/field/band-arch.jpg"
+         srcset="assets/img/field/band-arch-960.jpg 960w, assets/img/field/band-arch.jpg 2560w"
+         sizes="100vw" width="2560" height="800" loading="lazy" decoding="async"
+         alt="黄昏时分的康乐东约牌坊，朱红瓦顶，两侧楹联「乐鼓鸣海」「康衢接云」">
+    <div class="band-veil" aria-hidden="true"></div>
+    <div class="band-cap">
+      <div class="wrap">
+        <p class="band-kicker">Relational Map · 5 Layers</p>
+        <p class="band-sub">片区北至新港西路、东至广州大道南、西至瑞康路、南至逸景路；中大布匹市场就在北侧一路之隔。下面的意象图按这套方位摆放节点，但不按比例。</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -79,6 +96,65 @@
           <div id="poiList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
         </div>
       </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 规划图对照 ===== -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Plan Reference</p>
+      <h2 class="h-sec">规划图对照</h2>
+      <p class="lead">
+        上面的意象图是课题组绘制的，用来表达空间关系；下面这张是公开的规划图件，
+        用来核对方位与用地性质。两者并列，是为了让「大致在哪」这件事有据可查。
+      </p>
+    </div>
+
+    <figure class="panel reveal">
+      <span class="panel-tag">图件 · Document</span>
+      <img src="assets/img/boards/map-regulatory.jpg"
+           srcset="assets/img/boards/map-regulatory-thumb.jpg 560w, assets/img/boards/map-regulatory.jpg 1197w"
+           sizes="(max-width:760px) 100vw, 1100px" width="1197" height="827"
+           loading="lazy" decoding="async"
+           alt="原控规用地布局图：红色虚线为更新单元范围与改造范围，片区四周为新港西路、广州大道南、瑞康路与逸景路">
+      <figcaption>
+        <b>原控规用地布局图。</b>红色虚线为更新单元范围与改造范围（110.27 公顷）。
+        片区由新港西路（北）、广州大道南（东）、瑞康路（西）、逸景路（南）围合，
+        内部以居住用地与商业商务用地为主；图中北侧紧邻的即是中大布匹市场所在的中大纺织商圈。
+        意象图中的节点方位按这套边界摆放，但<b>不按比例、不具测绘精度</b>。
+        <span class="src">图件转载自公开渠道，版权归原公布单位</span>
+      </figcaption>
+    </figure>
+
+    <div class="panel-row reveal" style="margin-top:22px">
+      <figure class="panel">
+        <span class="panel-tag">图件 · Document</span>
+        <img src="assets/img/boards/board-market-map.jpg"
+             srcset="assets/img/boards/board-market-map-thumb.jpg 560w, assets/img/boards/board-market-map.jpg 1600w"
+             sizes="(max-width:760px) 100vw, 560px" width="1600" height="1200"
+             loading="lazy" decoding="async"
+             alt="中大纺织商圈市场分布图与海珠区纺织零工市场宣传板">
+        <figcaption>
+          <b>中大纺织商圈市场分布图。</b>板上把商圈内的各个专业市场与康鹭片区的位置关系画了出来，
+          可以看清「市场包围村庄」这句话在空间上是什么样子。
+          <span class="src">课题组田野拍摄，2026 年 8 月</span>
+        </figcaption>
+      </figure>
+      <figure class="panel">
+        <span class="panel-tag">图件 · Document</span>
+        <img src="assets/img/field/board-hiring-led.jpg"
+             srcset="assets/img/field/board-hiring-led-thumb.jpg 560w, assets/img/field/board-hiring-led.jpg 1474w"
+             sizes="(max-width:760px) 100vw, 560px" width="1474" height="897"
+             loading="lazy" decoding="async"
+             alt="海珠区纺织零工市场招工信息发布屏">
+        <figcaption>
+          <b>招工广场的信息发布屏。</b>招工广场是这张地图上人气最集中的节点（原鹭江球场，
+          约 4875 平方米，2023 年改造）。屏上的工种与工价，是「产业空间」这一图层最直接的注脚。
+          <span class="src">课题组田野拍摄，2026 年 8 月</span>
+        </figcaption>
+      </figure>
     </div>
   </div>
 </section>
