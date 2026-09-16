@@ -66,15 +66,25 @@ function initCounters(){
 }
 
 /* ---------- 进度条动画 ---------- */
+/* 注意：.bar-fill 的初始宽度是 0，元素本身是零面积。
+   零面积目标在部分浏览器里不会触发带 threshold 的交叉回调，会导致进度条永远是空的，
+   因此这里改为观察有真实面积的 .bar-track（不存在时才回退到父节点），阈值降到 0。 */
 function initBars(){
   const fills = $$('.bar-fill[data-w]');
   if (!fills.length) return;
   const set = f => { f.style.width = f.dataset.w + '%'; };
   if (!('IntersectionObserver' in window)){ fills.forEach(set); return; }
   const io = new IntersectionObserver(es => {
-    es.forEach(e => { if (e.isIntersecting){ set(e.target); io.unobserve(e.target); } });
-  }, { threshold:.4 });
-  fills.forEach(f => io.observe(f));
+    es.forEach(e => {
+      if (!e.isIntersecting) return;
+      const f = e.target.classList.contains('bar-fill')
+        ? e.target
+        : e.target.querySelector('.bar-fill[data-w]');
+      if (f && f.dataset.w) set(f);
+      io.unobserve(e.target);
+    });
+  }, { threshold:0 });
+  fills.forEach(f => io.observe(f.closest('.bar-track') || f.parentElement || f));
 }
 
 /* ---------- 统计条 ---------- */

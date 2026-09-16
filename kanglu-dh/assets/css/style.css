@@ -303,12 +303,15 @@ section.tight{ padding:56px 0; }
 .gloss-item dt span{ display:inline-block; width:8px; height:8px; background:var(--ochre); margin-right:9px; transform:translateY(-2px); }
 .gloss-item dd{ margin:0; font-size:13px; color:var(--ink-2); line-height:1.95; }
 
-/* 数据条 */
+/* 数据条
+   注意：.bar-track / .bar-fill 都是 <span>，行内元素的 width/height 不生效。
+   .bar-track 作为 grid 子项会被自动块化，但 .bar-fill 不是 grid 子项，
+   必须显式 display:block，否则无论宽度写成多少都画不出来。 */
 .bars{ display:flex; flex-direction:column; gap:16px; }
 .bar-row{ display:grid; grid-template-columns:110px 1fr 60px; align-items:center; gap:16px; }
 .bar-row .bl{ font-size:13px; color:var(--ink-2); }
-.bar-track{ height:9px; background:var(--paper-3); border-radius:5px; overflow:hidden; }
-.bar-fill{ height:100%; border-radius:5px; width:0; transition:width 1.1s cubic-bezier(.2,.7,.3,1); }
+.bar-track{ display:block; height:9px; background:var(--paper-3); border-radius:5px; overflow:hidden; }
+.bar-fill{ display:block; height:100%; border-radius:5px; width:0; transition:width 1.1s cubic-bezier(.2,.7,.3,1); }
 .bar-row .bv{ font-family:var(--mono); font-size:12.5px; color:var(--ink-2); text-align:right; }
 
 /* 参考文献 */
