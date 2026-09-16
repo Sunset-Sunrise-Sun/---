@@ -22,24 +22,28 @@ function initHeader(){
 }
 
 /* ---------- 滚动显现 ---------- */
+/* 单例 observer：可重复调用（筛选后重新渲染卡片时不会堆积 observer、也不会漏挂新节点） */
+let _revealIO = null;
 function initReveal(){
-  const items = $$('.reveal');
+  const items = $$('.reveal:not(.in):not([data-obs])');
   if (!items.length) return;
   if (!('IntersectionObserver' in window)){ items.forEach(i => i.classList.add('in')); return; }
-  const io = new IntersectionObserver((ents) => {
-    ents.forEach((en, i) => {
-      if (en.isIntersecting){
-        setTimeout(() => en.target.classList.add('in'), i * 60);
-        io.unobserve(en.target);
-      }
-    });
-  }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
-  items.forEach(i => io.observe(i));
+  if (!_revealIO){
+    _revealIO = new IntersectionObserver((ents) => {
+      ents.forEach((en, i) => {
+        if (en.isIntersecting){
+          setTimeout(() => en.target.classList.add('in'), i * 60);
+          _revealIO.unobserve(en.target);
+        }
+      });
+    }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
+  }
+  items.forEach(i => { i.dataset.obs = '1'; _revealIO.observe(i); });
 }
 
 /* ---------- 数字滚动 ---------- */
 function initCounters(){
-  const nodes = $$('[data-count]');
+  const nodes = $$('[data-count]:not([data-cnt])');
   if (!nodes.length) return;
   const run = el => {
     const target = parseFloat(el.dataset.count);
@@ -54,11 +58,11 @@ function initCounters(){
     };
     requestAnimationFrame(tick);
   };
-  if (!('IntersectionObserver' in window)){ nodes.forEach(run); return; }
+  if (!('IntersectionObserver' in window)){ nodes.forEach(el => { el.dataset.cnt = '1'; run(el); }); return; }
   const io = new IntersectionObserver(ents => {
     ents.forEach(en => { if (en.isIntersecting){ run(en.target); io.unobserve(en.target); } });
   }, { threshold:.5 });
-  nodes.forEach(n => io.observe(n));
+  nodes.forEach(n => { n.dataset.cnt = '1'; io.observe(n); });
 }
 
 /* ---------- 进度条动画 ---------- */
@@ -136,9 +140,44 @@ function renderRefs(sel){
   box.innerHTML = REFS.map(r => `<li><b>${r.t}</b><span>${r.d}</span></li>`).join('');
 }
 
+/* ---------- 封面 ---------- */
+/* 两层效果：
+   1) 顶栏透明态切换——封面底部仍在顶栏之下时顶栏透明，滚过封面后恢复纸感实底
+   2) 滚动视差——封面图以 0.08 系数缓慢位移，制造纵深（.cover-media 上下各留 10% 余量） */
+function initCover(){
+  const cover = $('.cover');
+  if (!cover) return;
+  const media = $('.cover-media', cover);
+  const head  = $('.site-head');
+  const calm  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (head){
+    const sync = () => head.classList.toggle('head-clear', cover.getBoundingClientRect().bottom > head.offsetHeight + 20);
+    sync();
+    window.addEventListener('scroll', sync, { passive:true });
+    window.addEventListener('resize', sync);
+  }
+
+  if (media && !calm){
+    let raf = 0;
+    const move = () => {
+      raf = 0;
+      const h = cover.offsetHeight;
+      const y = Math.min(Math.max(-cover.getBoundingClientRect().top, 0), h);
+      media.style.transform = `translate3d(0, ${(y * .08).toFixed(2)}px, 0)`;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(move); };
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    move();
+  }
+}
+
 /* ---------- 启动 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
+  initCover();
   initReveal();
   initCounters();
+  initBars();
 });

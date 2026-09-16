@@ -540,3 +540,136 @@ section.tight{ padding:56px 0; }
   .search-box{ margin-left:0; width:100%; }
   .search-box input{ width:100%; }
 }
+
+/* ============================================================
+   封面 Cover
+   ------------------------------------------------------------
+   全屏实景封面：图片缓慢推进入场 + 文案分层浮现 + 滚动视差。
+   顶栏在封面之上时转为透明（.head-clear），滚过封面后恢复纸感实底。
+   ============================================================ */
+.site-head{ transition:background .35s ease, border-color .35s ease, backdrop-filter .35s ease; }
+
+.cover{
+  position:relative; padding:0; overflow:hidden;
+  /* 顶栏是 sticky 占位 66px，用负边距让封面铺到页面最顶端、顶栏浮在图上 */
+  margin-top:-66px;
+  min-height:calc(100vh + 66px);
+  min-height:calc(100svh + 66px);
+  display:flex; align-items:flex-end;
+  background:#0c151f;
+  border-bottom:1px solid var(--line);
+}
+/* 视差容器：上下各留 10% 余量，位移时不会露出底边 */
+.cover-media{ position:absolute; inset:-10% 0; z-index:0; will-change:transform; }
+.cover-img{
+  width:100%; height:100%; object-fit:cover; object-position:50% 48%;
+  /* 只做「缓慢推近」，不参与透明度的开场：
+     动画若不执行或被策略拦，封面图仍然是可见的，不会留下一片空底 */
+  animation:coverIn 2.4s cubic-bezier(.22,.61,.36,1) both;
+}
+@keyframes coverIn{ from{ transform:scale(1.09); } to{ transform:scale(1); } }
+
+.cover-veil{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,21,.66) 0%, rgba(8,14,21,.14) 24%, rgba(8,14,21,.10) 42%,
+                            rgba(8,14,21,.72) 84%, rgba(8,14,21,.93) 100%),
+    radial-gradient(130% 70% at 50% 104%, rgba(8,14,21,.55), transparent 62%);
+}
+/* 底部留出 96px：封面比视口高 66px（顶栏占位），
+   底部锚定的内容必须再让开这 66px，首屏才能完整看到 meta 行与滚动提示 */
+.cover-inner{ position:relative; z-index:2; width:100%; padding:0 0 96px; }
+
+/* 文案分层入场 */
+.cover .anim{ opacity:0; transform:translateY(20px); animation:coverUp .95s cubic-bezier(.22,.61,.36,1) forwards; }
+.cover .a1{ animation-delay:.50s } .cover .a2{ animation-delay:.66s }
+.cover .a3{ animation-delay:.84s } .cover .a4{ animation-delay:1.00s }
+@keyframes coverUp{ to{ opacity:1; transform:none; } }
+
+.cover-eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.26em; text-transform:uppercase;
+  color:#e6c9a6; display:flex; align-items:center; gap:12px; margin:0 0 16px;
+}
+.cover-eyebrow::before{ content:""; width:34px; height:1px; background:#d97a63; }
+.cover-title{
+  font-family:var(--serif); font-size:clamp(40px,6.2vw,80px); font-weight:700;
+  color:#fff; letter-spacing:.14em; line-height:1.08; margin:0 0 18px;
+  text-shadow:0 2px 30px rgba(0,0,0,.5);
+}
+.cover-sub{
+  font-size:16.5px; line-height:2; color:rgba(255,255,255,.86);
+  max-width:56ch; margin:0 0 30px; text-shadow:0 1px 14px rgba(0,0,0,.5);
+}
+.cover-meta{ border-top-color:rgba(255,255,255,.24); }
+.cover-meta div{ border-right-color:rgba(255,255,255,.18); }
+.cover-meta dt{ color:rgba(255,255,255,.62); }
+.cover-meta dd{ color:#fff; }
+
+.cover-hint{
+  position:absolute; right:32px; bottom:96px; z-index:3;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.24em; text-transform:uppercase;
+  color:rgba(255,255,255,.72);
+}
+.cover-hint i{
+  width:1px; height:38px;
+  background:linear-gradient(180deg,rgba(255,255,255,.75),transparent);
+  animation:coverBob 2.4s ease-in-out infinite;
+}
+@keyframes coverBob{ 0%,100%{ transform:translateY(0); opacity:.55 } 50%{ transform:translateY(9px); opacity:1 } }
+
+/* 顶栏浮在封面上时的透明态 */
+.site-head.head-clear{ background:transparent; border-bottom-color:transparent; backdrop-filter:none; }
+.site-head.head-clear .brand-mark{ border-color:rgba(255,255,255,.8); background:transparent; }
+.site-head.head-clear .brand-mark::before{ border-color:rgba(255,255,255,.45); }
+.site-head.head-clear .brand-mark span,
+.site-head.head-clear .brand-txt b{ color:#fff; }
+.site-head.head-clear .brand-txt i{ color:rgba(255,255,255,.66); }
+.site-head.head-clear .nav a{ color:rgba(255,255,255,.84); }
+.site-head.head-clear .nav a:hover{ color:#fff; background:rgba(255,255,255,.14); }
+.site-head.head-clear .nav a.on{ color:#fff; }
+.site-head.head-clear .nav a.on::after{ background:#d97a63; }
+.site-head.head-clear .nav-toggle{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.4); }
+.site-head.head-clear .nav-toggle i,
+.site-head.head-clear .nav-toggle i::before,
+.site-head.head-clear .nav-toggle i::after{ background:#fff; }
+
+/* 页脚声明列表 */
+.foot-notes{ margin:0; padding:0; list-style:none; }.foot-notes li{ position:relative; padding-left:14px; font-size:12.5px; color:var(--ink-3); line-height:1.75; margin-bottom:8px; }
+.foot-notes li::before{ content:""; position:absolute; left:0; top:9px; width:5px; height:1px; background:var(--ink-3); }
+.foot-notes code{ font-family:var(--mono); font-size:11.5px; }
+.foot-notes a{ color:var(--red); }
+
+@media (max-width:1080px){
+  .cover-inner{ padding-bottom:88px; }
+}
+@media (max-width:760px){
+  .cover-inner{ padding-bottom:120px; }
+  .cover-title{ letter-spacing:.08em; }
+  .cover-eyebrow{ flex-wrap:wrap; letter-spacing:.16em; font-size:10px; }
+  .cover-sub{ font-size:15px; margin-bottom:22px; max-width:100%; }
+  .cover-meta div{ padding-right:18px; margin-right:18px; }
+  .cover-hint{ right:auto; left:18px; bottom:96px; flex-direction:row; gap:8px; }
+  .cover-hint i{ width:26px; height:1px; background:linear-gradient(90deg,rgba(255,255,255,.75),transparent); }
+  /* 移动端下拉菜单是纸色实底，顶栏处于透明态时必须把导航文字改回深色，否则白字落在浅底上看不见 */
+  .site-head.head-clear .nav{ background:rgba(250,247,240,.97); border-bottom-color:var(--line); }
+  .site-head.head-clear .nav a{ color:var(--ink-2); }
+  .site-head.head-clear .nav a:hover{ color:var(--ink); background:var(--paper-2); }
+  .site-head.head-clear .nav a.on{ color:var(--red); }
+}
+
+/* 数字概览：统计格与占比条之间的间距 */
+.stats + .bars{ margin-top:44px; }
+
+/* 尊重系统「减少动态效果」设置 */
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .cover-img{ opacity:1; transform:none; animation:none; }
+  .cover .anim{ opacity:1; transform:none; animation:none; }
+  .cover-hint i{ animation:none; }
+}

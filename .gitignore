@@ -4,6 +4,12 @@
 # 原始压缩包：内容已解压为 kanglu-dh/
 网页-0910.zip
 
+# AI 问答接口的本地配置（含 API Key，绝不入库）
+kanglu-dh/assets/js/ai-config.js
+
+# xlsx 解析与临时脚本
+_xlsx_tmp/
+
 # 系统 / 编辑器临时文件
 Thumbs.db
 desktop.ini

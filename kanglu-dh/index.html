@@ -29,44 +29,40 @@
   </div>
 </header>
 
-<!-- ============ Hero ============ -->
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="eyebrow">Digital Humanities · Field Archive 2023–2026</p>
-      <h1>一平方公里的<br><em>中国快时尚心脏</em></h1>
-      <p class="lead">
-        这里是广州市海珠区的康乐村与鹭江村，合称「康鹭片区」。
-        约 1.1 平方公里的土地上，聚集了上万家小微制衣厂、近十万从业者，
-        以「早上看货、次日出货」的 24 小时节奏，支撑着全国快时尚供应链中最具弹性的一环。
-        2023 年起，片区进入「拆、治、兴」的更新改造进程——
-        本课题以数字人文的方法，记录这场正在发生的变迁中，那些关于空间、劳作与人的细节。
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="cover-media">
+    <img class="cover-img"
+         src="assets/img/cover.jpg"
+         srcset="assets/img/cover-sm.jpg 1280w, assets/img/cover.jpg 2560w"
+         sizes="100vw" width="2560" height="1440"
+         fetchpriority="high" decoding="async"
+         alt="康鹭片区实景拼贴：康乐鹭江牌坊、海珠区纺织零工市场招工信息发布栏、康鹭新招工广场与益诊坊">
+  </div>
+  <div class="cover-veil" aria-hidden="true"></div>
+
+  <div class="cover-inner">
+    <div class="wrap">
+      <p class="cover-eyebrow anim a1">Digital Humanities · Field Archive 2023–2026</p>
+      <h1 class="cover-title anim a2">康鹭记忆</h1>
+      <p class="cover-sub anim a3">
+        广州市海珠区的康乐村与鹭江村，合称「康鹭片区」。<br>
+        约 1.1 平方公里的土地上，密布着制衣厂、档口与辅料作坊，也容纳着来自湖北等地的大量务工者——
+        这里既是全国快时尚供应链中最具弹性的一环，也是广州中心城区投资额最大的旧改项目。
       </p>
-      <dl class="hero-meta">
+      <dl class="hero-meta cover-meta anim a4">
         <div><dt>Research Site</dt><dd>海珠区凤阳街道 康乐村 · 鹭江村</dd></div>
         <div><dt>Method</dt><dd>田野观察 · 口述整理 · 空间标注</dd></div>
         <div><dt>Records</dt><dd><span id="recPeople">—</span> 份人物档案 · <span id="recPoi">—</span> 处空间节点</dd></div>
       </dl>
     </div>
-
-    <aside class="hero-card">
-      <h4>调研说明</h4>
-      <ol>
-        <li>人物档案由课题组自行录入维护，当前为<b>示例数据</b>；替换内容只需编辑 <code style="font-family:var(--mono);font-size:12px">assets/js/people-data.js</code>。</li>
-        <li>「康鹭地图」为课题组绘制的意象示意图，用于表达空间关系与功能分区，<b>不具备测绘精度</b>，不可用于地籍、规划等实务用途。</li>
-        <li>时间轴与统计口径见<a href="background.html#refs" style="color:var(--red)">参考文献</a>；不同来源存在统计差异，页面已标注取用口径。</li>
-        <li>本站为教学与研究用途的数字人文成果展示，欢迎指正与补充。</li>
-      </ol>
-    </aside>
   </div>
 
-  <div class="wrap">
-    <div class="stats" id="stats"></div>
-  </div>
+  <a class="cover-hint anim a4" href="#entries"><span>向下滚动</span><i></i></a>
 </section>
 
 <!-- ============ 板块入口 ============ -->
-<section>
+<section id="entries">
   <div class="wrap">
     <div class="sec-head reveal">
       <p class="eyebrow">Navigate the Archive</p>
@@ -169,6 +165,7 @@
       <h2 class="h-sec">片区人口与产业构成</h2>
       <p class="lead">以下比例依据公开报道整理，反映 2023 年前后的典型状态，仅供研究参考。</p>
     </div>
+    <div class="stats" id="stats"></div>
     <div class="bars" id="bars"></div>
   </div>
 </section>
@@ -192,7 +189,12 @@
     </div>
     <div>
       <h5>引用与声明</h5>
-      <p>人物档案由课题组录入维护，地图为意象示意图，统计数据标注来源口径。内容仅用于教学与研究，转载请注明出处。</p>
+      <ul class="foot-notes">
+        <li>人物档案由课题组自行录入维护，当前为<b>示例数据</b>；替换内容只需编辑 <code>assets/js/people-data.js</code>。</li>
+        <li>「康鹭地图」为课题组绘制的意象示意图，用于表达空间关系与功能分区，<b>不具备测绘精度</b>，不可用于地籍、规划等实务用途。</li>
+        <li>时间轴与统计口径见<a href="background.html#refs">参考文献</a>；不同来源存在统计差异，页面已标注取用口径。</li>
+        <li>本站为教学与研究用途的数字人文成果展示，欢迎指正与补充。</li>
+      </ul>
     </div>
   </div>
   <div class="foot-bot">
@@ -225,7 +227,8 @@
       <span class="bv">${b.t}</span>
     </div>`).join('');
 
-  initReveal(); initCounters(); initBars();
+  // 滚动显现 / 数字滚动 / 进度条统一由 main.js 的 DOMContentLoaded 初始化，
+  // 此处只负责把数据渲染进 DOM，避免重复创建 IntersectionObserver。
 </script>
 </body>
 </html>
