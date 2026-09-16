@@ -268,6 +268,8 @@ section.tight{ padding:56px 0; }
     radial-gradient(600px 260px at 6% 100%, rgba(179,69,47,.06), transparent 60%);
 }
 .page-banner h1{ font-size:46px; margin:8px 0 14px; letter-spacing:.03em; }
+/* 紧接影像带的页头不要底边线：那条 1px 线正好压在带的渐变上沿，会露出一道硬边 */
+.page-banner--flush{ border-bottom:0; }
 .crumb{ font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--ink-3); }
 .crumb a:hover{ color:var(--red); }
 
@@ -797,9 +799,16 @@ section.has-band{ padding-top:0; }
 .band-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .band-veil{
   position:absolute; inset:0;
+  /* 上下都要渐隐：顶端从纸色较缓地淡入（约 13% 高度），避免照片"硬切"进版面；
+     底部完全过渡到纸色，标题因此落在干净的深字浅底上 */
   background:linear-gradient(180deg,
-    rgba(250,247,240,.42) 0%, rgba(250,247,240,.16) 32%,
-    rgba(250,247,240,.76) 70%, var(--paper) 99%);
+    var(--paper) 0%,
+    rgba(250,247,240,.78) 4%,
+    rgba(250,247,240,.36) 13%,
+    rgba(250,247,240,.16) 30%,
+    rgba(250,247,240,.15) 48%,
+    rgba(250,247,240,.78) 76%,
+    var(--paper) 100%);
 }
 .band-cap{ position:relative; z-index:2; width:100%; padding-bottom:22px; }
 .band-kicker{
@@ -846,6 +855,47 @@ section.has-band{ padding-top:0; }
 
 /* 面板成对排列 */
 .panel-row{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:56px; }
+
+/* ============================================================
+   左侧竖排小节导航（大屏）+ 横排跳转条（小屏）
+   ------------------------------------------------------------
+   竖排导航默认只显示轴与圆点（不带文字），悬停时展开标签；
+   轴上方到当前滚动位置之间填充朱红，作为阅读进度。
+   ============================================================ */
+.side-nav{
+  position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:60;
+  display:flex; flex-direction:column; padding:12px 0;
+}
+.side-nav .track{
+  position:absolute; left:6px; top:16px; bottom:16px; width:1px;
+  background:rgba(121,112,95,.24); border-radius:1px; overflow:hidden;
+}
+.side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
+.side-nav a{
+  position:relative; display:flex; align-items:center; gap:12px;
+  padding:10px 0; font-size:12.5px; color:var(--ink-3); white-space:nowrap;
+}
+.side-nav a::before{
+  content:""; position:relative; z-index:1; flex:none;
+  width:10px; height:10px; border-radius:50%;
+  /* 圆点必须有足够对比度：纸色填充 + 浅边落在纸色页面上会完全看不见 */
+  background:var(--paper); border:2px solid rgba(121,112,95,.42); transition:.25s;
+}
+/* 标签默认隐藏，悬停整条导航才展开；加纸色底片，即使压住正文也可读 */
+.side-nav a span{
+  opacity:0; transform:translateX(-8px); pointer-events:none; transition:.25s;
+  font-family:var(--serif);
+  background:var(--paper); border:1px solid var(--line); border-radius:3px;
+  padding:3px 9px; box-shadow:var(--shadow-sm);
+}
+.side-nav:hover a span{ opacity:1; transform:none; }
+.side-nav a.on::before{ background:var(--red); border-color:var(--red); box-shadow:0 0 0 3px rgba(179,69,47,.13); }
+.side-nav a.on{ color:var(--red); }
+.side-nav a:hover::before{ border-color:var(--red); }
+
+/* 只有横向余量足够时才显示，避免圆点压到正文 */
+@media (max-width:1299px){ .side-nav{ display:none; } }
+@media (min-width:1300px){ .subnav-wrap{ display:none; } }
 
 @media (max-width:1080px){
   .feature, .feature.flip{ grid-template-columns:1fr; gap:26px; align-items:start; }

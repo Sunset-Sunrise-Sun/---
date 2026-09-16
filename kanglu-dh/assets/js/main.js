@@ -199,10 +199,54 @@ function initCover(){
   }
 }
 
+/* ---------- 左侧小节导航（滚动进度） ---------- */
+/* 1) 用 IntersectionObserver 把视口中线所在的小节标为当前项
+   2) 轴上从顶端到当前阅读位置填充朱红，作为进度 */
+function initSideNav(){
+  const nav = $('.side-nav');
+  if (!nav) return;
+  const links = $$('a[data-side]', nav);
+  if (!links.length) return;
+  const targets = links.map(a => document.getElementById(a.dataset.side)).filter(Boolean);
+  if (!targets.length) return;
+  const fill = $('.track i', nav);
+
+  links.forEach(a => {
+    if (!document.getElementById(a.dataset.side)) a.style.display = 'none';
+  });
+
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver(ents => {
+      ents.forEach(en => {
+        if (!en.isIntersecting) return;
+        links.forEach(a => a.classList.toggle('on', a.dataset.side === en.target.id));
+      });
+    }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
+    targets.forEach(t => io.observe(t));
+  }
+
+  if (fill){
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const top = targets[0].getBoundingClientRect().top + window.scrollY;
+      const last = targets[targets.length - 1];
+      const bottom = last.getBoundingClientRect().bottom + window.scrollY;
+      const p = (window.scrollY + window.innerHeight * .5 - top) / Math.max(1, bottom - top);
+      fill.style.height = (Math.max(0, Math.min(1, p)) * 100).toFixed(1) + '%';
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+}
+
 /* ---------- 启动 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initCover();
+  initSideNav();
   initReveal();
   initCounters();
   initBars();

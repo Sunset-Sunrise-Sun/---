@@ -26,7 +26,7 @@
   </div>
 </header>
 
-<section class="page-banner">
+<section class="page-banner page-banner--flush">
   <div class="wrap">
     <p class="crumb"><a href="index.html">首页</a> / 背景资料</p>
     <h1>背景资料</h1>
@@ -38,7 +38,20 @@
   </div>
 </section>
 
-<div class="wrap" style="margin-top:32px">
+<!-- 大屏：左侧竖排小节导航（竖轴 + 圆点，轴上朱红填充为阅读进度） -->
+<nav class="side-nav" aria-label="小节导航">
+  <span class="track" aria-hidden="true"><i></i></span>
+  <a href="#location" data-side="location"><span>区位与概况</span></a>
+  <a href="#industry" data-side="industry"><span>产业逻辑</span></a>
+  <a href="#space" data-side="space"><span>空间形态</span></a>
+  <a href="#chronicle" data-side="chronicle"><span>编年</span></a>
+  <a href="#glossary" data-side="glossary"><span>乡土词条</span></a>
+  <a href="#policy" data-side="policy"><span>改造与政策</span></a>
+  <a href="#refs" data-side="refs"><span>参考文献</span></a>
+</nav>
+
+<!-- 小屏：保留横排跳转条 -->
+<div class="wrap subnav-wrap" style="margin-top:32px">
   <nav class="subnav">
     <a href="#location">区位与概况</a>
     <a href="#industry">产业逻辑</a>
@@ -53,10 +66,10 @@
 <!-- ===== 区位与概况 ===== -->
 <section id="location" class="has-band">
   <div class="band">
-    <img class="band-img" src="assets/img/field/arch-kangle-1.jpg"
-         srcset="assets/img/field/arch-kangle-1-thumb.jpg 560w, assets/img/field/arch-kangle-1.jpg 1800w"
-         sizes="100vw" width="1800" height="1350" loading="lazy" decoding="async"
-         alt="黄昏时分的康乐东约牌坊，朱红瓦顶，身后是写字楼与广州住房公积金管理中心大楼">
+    <img class="band-img" src="assets/img/field/band-arch.jpg"
+         srcset="assets/img/field/band-arch-960.jpg 960w, assets/img/field/band-arch.jpg 2560w"
+         sizes="100vw" width="2560" height="800" loading="lazy" decoding="async"
+         alt="黄昏时分的康乐东约牌坊，朱红瓦顶，两侧楹联「乐鼓鸣海」「康衢接云」，背后是成排的榕树">
     <div class="band-veil" aria-hidden="true"></div>
     <div class="band-cap">
       <div class="wrap">
@@ -135,10 +148,10 @@
 <!-- ===== 产业逻辑 ===== -->
 <section id="industry" class="has-band">
   <div class="band short">
-    <img class="band-img" src="assets/img/field/market-hiring-1.jpg"
-         srcset="assets/img/field/market-hiring-1-thumb.jpg 560w, assets/img/field/market-hiring-1.jpg 1800w"
-         sizes="100vw" width="1800" height="647" loading="lazy" decoding="async"
-         alt="招工广场通栏全景：白色棚顶之下是成排摊位与 LED 公示屏">
+    <img class="band-img" src="assets/img/field/band-market.jpg"
+         srcset="assets/img/field/band-market-960.jpg 960w, assets/img/field/band-market.jpg 2560w"
+         sizes="100vw" width="2560" height="711" loading="lazy" decoding="async"
+         alt="招工广场宽幅全景：白色棚顶之下是 LED 公示屏与往来的人群，两侧是榕树与城中村楼群">
     <div class="band-veil" aria-hidden="true"></div>
     <div class="band-cap">
       <div class="wrap">
