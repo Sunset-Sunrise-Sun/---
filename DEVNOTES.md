@@ -36,6 +36,23 @@
   - **根因**：同为命名管道限制。
   - **解决**：放宽沙箱后正常出图（策略改为 `danger-full-access` 后不再需要逐次申请）。
 
+### 1.2d 两个反复踩到的坑：未声明变量 + 截图验证的假阳性
+
+- **坑一：删代码块时误删变量声明 → 运行期 ReferenceError**
+  现象：小白鹭「头朝鼠标」怎么改都不动。
+  根因：替换代码块时把 `var flipped = ...` 这一行一起删掉了，而后面仍在用 `flipped`。
+  每次 `mousemove` 都抛 `ReferenceError`，`transform` 永远写不进去。
+  `node --check` **只查语法、不查未声明变量**，所以一路"语法 OK"。
+  → 教训：改动时若 `old_string` 里含声明行，务必确认 `new_string` 里还在。
+  → 排查手法：把 `head.style.transform` 的真实值渲染到页面上再截图读数——
+    第 1 帧是 `(空)` 且始终不更新，就说明是"根本没写进去"，而不是"写了没画出来"。
+- **坑二：截图差异可能来自动画相位，而非被测的改动**
+  现象：对比「鼠标在右/左」两张截图，鸟的位置明显不同，看着像生效了。
+  根因：`.ai-bird` 上有 `aiBirdBob` 浮动动画，两次截图取到的相位不同，差异全来自它。
+  → 正确做法：验证某个变换时，先 `animation:none !important` 关掉无关动画，
+    并且**读渲染后的实际值**（`head.style.transform` / `getComputedStyle`），
+    而不是只看"两张图不一样"。
+
 ### 1.2c CSS 动画的 transform 会盖掉普通声明的 transform
 
 - **现象**：给 `.ai-bird` 加了 `animation: aiBirdBob`（写 `transform:translateY`）之后，

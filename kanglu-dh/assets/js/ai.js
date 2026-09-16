@@ -481,17 +481,20 @@
       var hy = r.top + r.height * 0.30;
       var dx = mx - hx, dy = my - hy;
       var d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      var flipped = els.wrap.classList.contains('flip');
       /* 用叠加模型而不是方位角：
          方位角在"鼠标与头同高"时恒为 0，横向移动完全看不出反应（这就是之前"头不转"的原因）。
-         改为「横向偏移 → 歪头角度」+「纵向偏移 → 颔首角度」，横向一动就有反馈。 */
+         改为「横向偏移 → 歪头角度」+「纵向偏移 → 颔首角度」，横向一动就有反馈。
+         幅度取到 ±24°/±9°，是为了"一眼能看见"——早先 ±13° 实际只有两三度，等于没转。 */
       var localX = flipped ? -dx : dx;
-      var amp = Math.min(5, d / 40);
+      var amp = Math.min(9, d / 22);
       var tx = (localX / d) * amp, ty = (dy / d) * amp;
-      var rot = Math.max(-13, Math.min(13, localX / 42));   /* 横向：左右歪头 */
-      var tilt = Math.max(-7, Math.min(7, dy / 34));        /* 纵向：抬头/低头 */
+      var rot = Math.max(-24, Math.min(24, localX / 22));   /* 横向：左右歪头 */
+      var tilt = Math.max(-9, Math.min(9, dy / 26));        /* 纵向：抬头/低头 */
+      var deg = Math.max(-28, Math.min(28, rot + tilt));
 
       head.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) '
-        + 'rotate(' + (rot + tilt).toFixed(1) + 'deg)';
+        + 'rotate(' + deg.toFixed(1) + 'deg)';
 
       els.wrap.classList.toggle('flip', dx < -10 && Math.abs(dy) < 260);
     }
