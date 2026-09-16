@@ -21,7 +21,24 @@
 
   var DEFAULTS = {
     title: '康鹭摸摸问',
-    intro: '关于康鹭片区，问点具体的。',
+    intro: '我是小白鹭，就住在鹭江边。康鹭的事，你问，我讲给你听。',
+    /* 人格设定：这是"回答像百度搜索"的解药——先立人，再约束事实 */
+    persona: [
+      '你叫小白鹭，是「康鹭记忆」这个数字人文项目的向导，一只住在鹭江边的小白鹭。',
+      '你不是搜索引擎，而是带人逛展的人：说人话、有温度，用「我」自称。',
+      '偶尔可以带一句鹭鸟的视角（爱站在水边看人来人往、记性还好），但别卖萌过头，一次一句就够。',
+      '',
+      '三条底线：',
+      '1. 只讲广州海珠康鹭片区（康乐村、鹭江村）的制衣产业、空间与人；别的话题礼貌推回。',
+      '2. 只用下面「与本次提问相关的资料」里的事实。绝不编造数字、人名或时间——',
+      '   没记下来的就直说「这个我没记下来」，再建议一个可能的问法。',
+      '3. 不要「根据资料」「综上所述」「首先其次」这类百科腔，也不要堆名词。',
+      '   把一个事讲清楚，通常 120 字以内；确实需要展开时，最多再加两句。',
+      '',
+      '结尾：如果答案对应站内某一页或某一节，就另起一行给一个 Markdown 链接，',
+      '格式 [去看「小节名」](路径)，链接文字**只写小节名**，不要把路径再写进文字里。',
+      '路径只能从下面「站内目录」里挑，不要自己编。问题与站内内容无关时不用给链接。'
+    ].join('\n'),
     temperature: 0.3,
     maxTokens: 800,
     topChunks: 8,
@@ -38,60 +55,64 @@
   };
 
   var cfg = {};
-  var corpusCache = null;
   var els = null;
   var busy = false;
 
-  /* ---------- 站点数据 → 完整语料 ---------- */
-  function corpus() {
-    if (corpusCache) return corpusCache;
-    var parts = [];
+  /* ---------- 站点数据 → 带出处的语料 ----------
+     每个片段都记着它来自站内哪一节，这样即使是本地检索也能给出可跳转的链接。 */
+  var CHUNKS = null;
+  function chunks() {
+    if (CHUNKS) return CHUNKS;
+    var out = [];
+    /* group 用于「小节展开」：同组片段会被一起带进提示词。
+       注意不能按 link 分组——4 份档案的链接是 person.html?id=aX，与概述的 people.html 不同。 */
+    function add(group, section, link, text) {
+      String(text).split(/[\n；]+/).forEach(function (s) {
+        s = s.trim().replace(/^【[^】]*】/, '');
+        if (s.length > 8) out.push({ text: s, group: group, section: section, link: link });
+      });
+    }
 
     if (typeof STATS !== 'undefined') {
-      parts.push('【数字】' + STATS.map(function (s) {
+      add('stats', '首页 · 数字里的康鹭', 'index.html#figures', STATS.map(function (s) {
         return (s.suffix || '') + s.num + s.unit + ' ' + s.label + '（' + s.desc + '）';
       }).join('；'));
     }
     if (typeof HISTORY !== 'undefined') {
-      parts.push('【发展历程】' + HISTORY.map(function (h) {
+      add('history', '首页 · 发展历程', 'index.html#history', HISTORY.map(function (h) {
         return h.era + ' ' + h.title + '：' + h.body.join('');
       }).join('\n'));
     }
     if (typeof GLOSSARY !== 'undefined') {
-      parts.push('【乡土词条】' + GLOSSARY.map(function (g) {
+      add('glossary', '背景资料 · 乡土词条', 'background.html#glossary', GLOSSARY.map(function (g) {
         return g.term + '：' + g.def;
       }).join('；'));
     }
     if (typeof POIS !== 'undefined') {
-      parts.push('【空间节点】' + POIS.map(function (p) {
+      add('pois', '康鹭地图', 'map.html', POIS.map(function (p) {
         return p.name + '（' + p.summary + '）';
       }).join('；'));
     }
     if (typeof PEOPLE !== 'undefined') {
-      /* 开头这句概述是必要的：档案本身只写「档案一/二…」，
-         若不点明「共 4 份、受访者 4 位」，问「有几位受访者」就检索不到 */
-      parts.push('【人物档案】本站共收录 ' + PEOPLE.length + ' 份田野访谈档案（受访者共 ' +
-        PEOPLE.length + ' 位）。' +
-        PEOPLE.map(function (p) {
-          return '档案' + p.no + '：' + p.label + '，' + p.sub + '。' + p.lead;
-        }).join('\n'));
+      /* 这句概述是必要的：档案本身只写「档案一/二…」，
+         不点明「共 4 份、受访者 4 位」，问「有几位受访者」就检索不到 */
+      add('people', '人物档案', 'people.html',
+        '本站共收录 ' + PEOPLE.length + ' 份田野访谈档案（受访者共 ' + PEOPLE.length + ' 位）。');
+      PEOPLE.forEach(function (p) {
+        add('people', '人物档案 · 档案' + p.no, 'person.html?id=' + encodeURIComponent(p.id),
+          '档案' + p.no + '：' + p.label + '，' + p.sub + '。' + p.lead);
+      });
     }
     if (typeof REFS !== 'undefined') {
-      parts.push('【参考文献】' + REFS.map(function (r) { return r.t; }).join('；'));
+      add('refs', '背景资料 · 参考文献', 'background.html#refs',
+        REFS.map(function (r) { return r.t; }).join('；'));
     }
 
-    corpusCache = parts.join('\n\n');
-    return corpusCache;
+    CHUNKS = out;
+    return CHUNKS;
   }
 
   /* ---------- 检索 ---------- */
-  function paragraphs() {
-    return corpus()
-      .split(/[\n；]+/)
-      .map(function (s) { return s.trim().replace(/^【[^】]*】/, ''); })
-      .filter(function (s) { return s.length > 8; });
-  }
-
   function gramsOf(q) {
     var clean = String(q).replace(/[？?。，,、\s「」（）()：:]/g, '');
     var g = [];
@@ -101,10 +122,10 @@
 
   function rank(q) {
     var g = gramsOf(q);
-    return paragraphs().map(function (p) {
+    return chunks().map(function (c) {
       var score = 0;
-      g.forEach(function (x) { if (p.indexOf(x) >= 0) score += 1; });
-      return { p: p, score: score };
+      g.forEach(function (x) { if (c.text.indexOf(x) >= 0) score += 1; });
+      return { text: c.text, group: c.group, section: c.section, link: c.link, score: score };
     }).sort(function (a, b) { return b.score - a.score; });
   }
 
@@ -120,31 +141,71 @@
     var list = rank(q);
     var top = list[0];
     if (!top || top.score < 1) {
-      return '这个问题在项目资料里没有找到对应记录。可以换个问法，或直接看站内的「背景资料」「康鹭地图」「人物档案」三页。';
+      return '这个问题在项目资料里没有找到对应记录。可以换个问法，或者从「背景资料」「康鹭地图」「人物档案」三页翻起。';
     }
-    var parts = [clip(top.p, 240)];
+    var out = [clip(top.text, 220)];
     var second = list[1];
-    if (second && second.p !== top.p && second.score >= top.score - 1) {
-      parts.push(clip(second.p, 180));
+    if (second && second.text !== top.text && second.score >= top.score - 1) {
+      out.push(clip(second.text, 160));
     }
-    return '（本地检索结果，未接入 AI 模型）\n\n' + parts.join('\n\n');
+    return '（本地检索结果，未接入 AI 模型）\n\n' + out.join('\n\n') +
+      '\n\n[去「' + top.section + '」看看 →](' + top.link + ')';
   }
 
-  /* ---------- 提示词：只带命中的片段 ---------- */
+  /* ---------- 站内目录：链接只能从这里挑 ---------- */
+  var SITE_MAP = [
+    '首页 · 康鹭简介 → index.html#intro',
+    '首页 · 数字里的康鹭 → index.html#figures',
+    '首页 · 发展历程 → index.html#history',
+    '首页 · 人物档案轮播 → index.html#people',
+    '背景资料 · 区位与概况 → background.html#location',
+    '背景资料 · 产业逻辑 → background.html#industry',
+    '背景资料 · 空间形态 → background.html#space',
+    '背景资料 · 编年 → background.html#chronicle',
+    '背景资料 · 乡土词条 → background.html#glossary',
+    '背景资料 · 改造与政策 → background.html#policy',
+    '背景资料 · 现场材料 → background.html#materials',
+    '背景资料 · 参考文献 → background.html#refs',
+    '康鹭地图 → map.html',
+    '人物档案（4 份）→ people.html',
+    '某一份档案 → person.html?id=a1（a1…a4）',
+    '声明与方法 → statement.html'
+  ].join('\n');
+
+  /* ---------- 提示词：人格 + 站内目录 + 命中片段 ---------- */
+  var lastHit = null;   /* 本次提问最相关的那一条，用于兜底补链接 */
+
   function systemPrompt(q) {
-    var top = rank(q)
-      .filter(function (x) { return x.score > 0; })
-      .slice(0, cfg.topChunks || DEFAULTS.topChunks)
-      .map(function (x) { return '· ' + x.p; });
+    var topN = cfg.topChunks || DEFAULTS.topChunks;
+    var ranked = rank(q);
+    var hits = ranked.filter(function (x) { return x.score > 0; }).slice(0, topN);
+
+    /* 小节展开：命中「人物档案」概述时，把同组的 4 份档案也带进来，
+       否则问「受访者有几位」只能拿到概述那一句，模型就无法列出是谁 */
+    if (hits.length) {
+      var topGroup = hits[0].group;
+      ranked.forEach(function (x) {
+        if (hits.length >= topN + 6) return;
+        if (x.group !== topGroup) return;
+        for (var i = 0; i < hits.length; i++) if (hits[i] === x) return;
+        hits.push(x);
+      });
+    }
+
+    lastHit = hits.length ? hits[0] : null;
+
+    var guide = hits.map(function (x) {
+      return '· ' + x.text + '　〔出处：' + x.section + ' → ' + x.link + '〕';
+    }).join('\n');
 
     return [
-      '你是「康鹭记忆」数字人文项目的问答助手，只回答与广州海珠康鹭片区（康乐村、鹭江村）制衣产业相关的问题。',
-      '回答必须依据下面的「相关资料」，不要编造数据、人名或时间；资料里没有的就直说“项目资料里没有记录”，',
-      '并提示读者可以看站内的哪一页（背景资料 / 康鹭地图 / 人物档案 / 声明与方法）。',
-      '用简体中文，语气平实，控制在 200 字以内，必要时分点。不要复述本段说明。',
+      cfg.persona || DEFAULTS.persona,
       '',
-      '=== 相关资料 ===',
-      top.length ? top.join('\n') : '（本次没有检索到相关片段，请据实说明资料中没有记录）'
+      '=== 站内目录（链接只能从这里挑，不要自己编）===',
+      SITE_MAP,
+      '',
+      '=== 与本次提问相关的资料（括注里已给出该条对应的站内位置）===',
+      guide || '（本次没有检索到相关片段，请据实说明资料里没有记录，并建议一个大致方向）'
     ].join('\n');
   }
 
@@ -420,17 +481,17 @@
       var hy = r.top + r.height * 0.30;
       var dx = mx - hx, dy = my - hy;
       var d = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      /* 用几何角度而非启发式：头在图形里本来就是朝右画的，
-         所以「头 → 鼠标」的方位角就是它该旋转的角度。
-         转身后局部坐标的 x 要取反，否则会"拧着脖子"看。 */
+      /* 用叠加模型而不是方位角：
+         方位角在"鼠标与头同高"时恒为 0，横向移动完全看不出反应（这就是之前"头不转"的原因）。
+         改为「横向偏移 → 歪头角度」+「纵向偏移 → 颔首角度」，横向一动就有反馈。 */
       var localX = flipped ? -dx : dx;
-      var amp = Math.min(4, d / 48);
+      var amp = Math.min(5, d / 40);
       var tx = (localX / d) * amp, ty = (dy / d) * amp;
-      var ang = Math.atan2(dy, localX) * 180 / Math.PI;
-      var rot = Math.max(-14, Math.min(14, ang));
+      var rot = Math.max(-13, Math.min(13, localX / 42));   /* 横向：左右歪头 */
+      var tilt = Math.max(-7, Math.min(7, dy / 34));        /* 纵向：抬头/低头 */
 
       head.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) '
-        + 'rotate(' + rot.toFixed(1) + 'deg)';
+        + 'rotate(' + (rot + tilt).toFixed(1) + 'deg)';
 
       els.wrap.classList.toggle('flip', dx < -10 && Math.abs(dy) < 260);
     }
@@ -495,6 +556,26 @@
     if (open) setTimeout(function () { els.input.focus(); }, 240);
   }
 
+  /* 把回答里的 Markdown 链接渲染成可点的链接。
+     安全约束：先整体转义，再只放行站内相对路径——
+     外部 http(s)、协议相对 //、javascript:、data: 一律还原成纯文本。 */
+  function escHTML(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function renderRich(el, text) {
+    el.innerHTML = escHTML(text).replace(
+      /\[([^\]\n]+)\]\(([^)\s]+)\)/g,
+      function (whole, label, url) {
+        if (/^(https?:)?\/\//i.test(url) || /^javascript:/i.test(url) || /^data:/i.test(url)) {
+          return label;
+        }
+        return '<a href="' + url + '">' + label + '</a>';
+      }
+    );
+  }
+
   function bubble(who, text) {
     var d = document.createElement('div');
     d.className = 'ai-msg ai-' + who;
@@ -526,10 +607,17 @@
       },
       function (full) {
         out.classList.remove('typing');
-        if (full) out.textContent = full;
-        else if (!out.textContent) out.textContent = '（没有返回内容）';
+        /* 流式过程中只显示纯文本（链接可能还没吐完），结束后再渲染成可点的链接 */
+        var text = full || out.textContent || '';
+        if (!text) text = '（没有返回内容）';
+        /* 不让格式依赖模型的自觉：真漏了链接，就补上本次最相关的那一节 */
+        if (text.indexOf('](') < 0 && lastHit) {
+          text += '\n\n[去「' + lastHit.section + '」看看 →](' + lastHit.link + ')';
+        }
+        renderRich(out, text);
         busy = false;
         els.send.disabled = false;
+        scheduleFit();
       },
       function (err) {
         out.classList.remove('typing');

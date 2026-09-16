@@ -1018,7 +1018,9 @@ section.has-band{ padding-top:0; }
 .ai-bird-wrap:hover{ filter:drop-shadow(0 12px 24px rgba(28,26,23,.26)); }
 .ai-bird-wrap:focus-visible{ outline:2px dashed var(--red); outline-offset:6px; border-radius:8px; }
 .ai-bird-wrap.dragging{ cursor:grabbing; filter:drop-shadow(0 16px 28px rgba(28,26,23,.32)); }
-.ai-bird-wrap.flip .ai-bird{ transform:scaleX(-1); }
+/* 转身放在外层容器上：.ai-bird 上已经有 animation（aiBirdBob）在写 transform，
+   而 CSS 动画的优先级高于普通声明 —— 转身若写在 .ai-bird 上会被动画整个盖掉（踩过的坑） */
+.ai-bird-wrap.flip{ transform:scaleX(-1); }
 
 /* 小白鹭（默认形象，纯 SVG） */
 .ai-bird{
@@ -1085,6 +1087,10 @@ section.has-band{ padding-top:0; }
 .ai-me{ align-self:flex-end; background:var(--ink); color:var(--paper); max-width:88%; }
 .ai-msg.typing::after{ content:"…"; animation:aiBlink 1.1s steps(1) infinite; }
 @keyframes aiBlink{ 50%{ opacity:.25 } }
+/* 回答里的站内跳转链接 */
+.ai-msg a{ color:var(--red); text-decoration:none; border-bottom:1px solid rgba(179,69,47,.3); }
+.ai-msg a:hover{ border-bottom-color:var(--red); }
+.ai-me a{ color:var(--paper); }
 
 .ai-presets{ display:flex; flex-wrap:wrap; gap:7px; padding:0 16px 10px; }
 .ai-chip{

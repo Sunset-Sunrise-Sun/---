@@ -36,6 +36,16 @@
   - **根因**：同为命名管道限制。
   - **解决**：放宽沙箱后正常出图（策略改为 `danger-full-access` 后不再需要逐次申请）。
 
+### 1.2c CSS 动画的 transform 会盖掉普通声明的 transform
+
+- **现象**：给 `.ai-bird` 加了 `animation: aiBirdBob`（写 `transform:translateY`）之后，
+  另外写的 `.ai-bird-wrap.flip .ai-bird{ transform:scaleX(-1) }` **完全不生效**，转身效果从来没出现过。
+- **根因**：CSS 动画在层叠里的优先级高于普通声明，动画运行期间它会持续覆盖 `transform`，
+  所以在同一元素上「动画写 transform + 普通声明也写 transform」必然只有一个生效。
+- **解决**：把两件事拆到不同元素——浮动动画留在 `.ai-bird`（svg），
+  转身改到外层容器 `.ai-bird-wrap`（div）上。
+- **教训**：想让同一元素既动画又做另一套变换，用嵌套元素，不要指望优先级。
+
 ### 1.2b github.com 直连会间歇性不通，推送要走本机代理
 
 - **现象**：`git push` 报 `Failed to connect to github.com:443 after 21063 ms: Could not connect to server`，
