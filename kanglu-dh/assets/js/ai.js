@@ -236,10 +236,29 @@
     return !!(cfg.proxyUrl || (cfg.baseUrl && cfg.apiKey && cfg.model));
   }
 
+  /* 默认形象：一只小白鹭（鹭江的「鹭」），纯 SVG，零依赖。
+     配色沿用站点语言：纸白身 + 墨色勾线 + 朱红喙脚。 */
+  var EGRET_SVG =
+    '<svg class="ai-bird" viewBox="0 0 56 56" aria-hidden="true">' +
+      /* 腿脚：两条细腿 + 小横脚，画在身体下沿之下，别被身体盖住 */
+      '<path d="M22 37v10M31 37v10" stroke="#b3452f" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<path d="M18.5 47h7M27.5 47h7" stroke="#b3452f" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<ellipse class="ai-bird-body" cx="26" cy="28" rx="15" ry="11" fill="#faf7f0" stroke="#1c1a17" stroke-width="1.8"/>' +
+      '<path class="ai-bird-wing" d="M19 25c5-5 12-5 16 1-4 6-12 7-16-1z" fill="#eae2d3" stroke="#1c1a17" stroke-width="1.5"/>' +
+      '<g class="ai-bird-head">' +
+        '<circle cx="39" cy="16" r="9.5" fill="#faf7f0" stroke="#1c1a17" stroke-width="1.8"/>' +
+        '<path d="M33 8c2-5 7-6 10-3-3 .5-5 2-6 4.5" fill="none" stroke="#1c1a17" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<circle class="ai-bird-eye" cx="42" cy="14" r="1.9" fill="#1c1a17"/>' +
+        '<path class="ai-bird-beak" d="M48 14l7.5 2.2L48 18.6z" fill="#b3452f"/>' +
+      '</g>' +
+    '</svg>';
+
   function mascotHTML() {
     return cfg.mascotImg
       ? '<img class="ai-mascot-img" src="' + cfg.mascotImg + '" alt="">'
-      : '<span class="ai-mascot">' + (cfg.mascotText || DEFAULTS.mascotText) + '</span>';
+      : (cfg.mascotText && cfg.mascotText !== DEFAULTS.mascotText
+          ? '<span class="ai-mascot">' + cfg.mascotText + '</span>'
+          : EGRET_SVG);
   }
 
   function build() {

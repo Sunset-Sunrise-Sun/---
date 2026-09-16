@@ -1020,6 +1020,18 @@ section.has-band{ padding-top:0; }
   box-shadow:0 0 0 3px rgba(179,69,47,.14);
 }
 .ai-mascot-img{ width:44px; height:44px; border-radius:50%; object-fit:cover; display:block; }
+
+/* 小白鹭（默认形象，纯 SVG） */
+.ai-bird{ width:42px; height:42px; display:block; overflow:visible; }
+.ai-bird-head{ transform-box:fill-box; transform-origin:60% 80%; animation:aiBirdBob 4.2s ease-in-out infinite; }
+.ai-bird-eye{ transform-box:fill-box; transform-origin:center; animation:aiBirdBlink 5.2s ease-in-out infinite; }
+.ai-bird-wing{ transform-box:fill-box; transform-origin:80% 20%; transition:transform .3s ease; }
+.ai-launch:hover .ai-bird-wing{ transform:rotate(-9deg); }
+.ai-launch:hover .ai-bird{ animation:aiBirdHop .55s ease; }
+html.ai-open .ai-bird{ animation:aiBirdHop .55s ease; }
+@keyframes aiBirdBob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-1.6px) } }
+@keyframes aiBirdBlink{ 0%,90%,100%{ transform:scaleY(1) } 94%{ transform:scaleY(.12) } }
+@keyframes aiBirdHop{ 0%,100%{ transform:translateY(0) } 35%{ transform:translateY(-5px) } 70%{ transform:translateY(1px) } }
 .ai-launch-txt{
   writing-mode:vertical-rl; font-family:var(--mono); font-size:10px;
   letter-spacing:.12em; color:var(--ink-3);
