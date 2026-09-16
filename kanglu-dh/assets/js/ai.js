@@ -162,56 +162,73 @@
       return;
     }
 
-    var body = {
-      messages: [
-        { role: 'system', content: systemPrompt(q) },
-        { role: 'user', content: q }
-      ],
-      temperature: cfg.temperature == null ? DEFAULTS.temperature : cfg.temperature,
-      max_tokens: cfg.maxTokens || DEFAULTS.maxTokens,
-      stream: true
-    };
-    /* 走自建代理时，模型名与 key 由代理端决定，前端不传 */
-    if (!cfg.proxyUrl) body.model = cfg.model;
+    var messages = [
+      { role: 'system', content: systemPrompt(q) },
+      { role: 'user', content: q }
+    ];
+
+    function reqBody(stream) {
+      var b = {
+        messages: messages,
+        temperature: cfg.temperature == null ? DEFAULTS.temperature : cfg.temperature,
+        max_tokens: cfg.maxTokens || DEFAULTS.maxTokens,
+        stream: !!stream
+      };
+      /* 走自建代理时，模型名与 key 由代理端决定，前端不传 */
+      if (!cfg.proxyUrl) b.model = cfg.model;
+      return JSON.stringify(b);
+    }
 
     var headers = { 'Content-Type': 'application/json' };
     if (!cfg.proxyUrl && cfg.apiKey) headers.Authorization = 'Bearer ' + cfg.apiKey;
 
-    fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        if (!res.body || !res.body.getReader) {
-          return res.json().then(function (j) {
-            var t = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-            onDone(t || '（接口返回为空）');
-          });
-        }
-        var reader = res.body.getReader();
-        var dec = new TextDecoder();
-        var buf = '';
-        (function pump() {
-          return reader.read().then(function (r) {
-            if (r.done) { onDone(); return; }
-            buf += dec.decode(r.value, { stream: true });
-            var lines = buf.split('\n');
-            buf = lines.pop();
-            lines.forEach(function (line) {
-              line = line.trim();
-              if (!line || line.indexOf('data:') !== 0) return;
-              var payload = line.slice(5).trim();
-              if (payload === '[DONE]') return;
-              try {
-                var j = JSON.parse(payload);
-                var d = j.choices && j.choices[0];
-                var piece = (d && ((d.delta && d.delta.content) || (d.message && d.message.content))) || '';
-                if (piece) onDelta(piece);
-              } catch (e) { /* 忽略不完整的分片 */ }
+    /* stream=true 时边收边吐；onText 在结束时给出完整文本 */
+    function once(stream, onText, onFail) {
+      fetch(url, { method: 'POST', headers: headers, body: reqBody(stream) })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (!stream || !res.body || !res.body.getReader) {
+            return res.json().then(function (j) {
+              var c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+              onText(c || '');
             });
-            return pump();
-          });
-        })();
-      })
-      .catch(onError);
+          }
+          var reader = res.body.getReader();
+          var dec = new TextDecoder();
+          var buf = '', full = '';
+          (function pump() {
+            return reader.read().then(function (r) {
+              if (r.done) { onText(full); return; }
+              buf += dec.decode(r.value, { stream: true });
+              var lines = buf.split('\n');
+              buf = lines.pop();
+              lines.forEach(function (line) {
+                line = line.trim();
+                if (!line || line.indexOf('data:') !== 0) return;
+                var payload = line.slice(5).trim();
+                if (payload === '[DONE]') return;
+                try {
+                  var j = JSON.parse(payload);
+                  var d = j.choices && j.choices[0];
+                  var piece = (d && ((d.delta && d.delta.content) || (d.message && d.message.content))) || '';
+                  if (piece) { full += piece; onDelta(piece); }
+                } catch (e) { /* 忽略不完整的分片 */ }
+              });
+              return pump();
+            });
+          })();
+        })
+        .catch(onFail);
+    }
+
+    once(true, function (full) {
+      if (full) { onDone(full); return; }
+      /* 流式一个字都没收到——可能是换了推理模型（token 全花在 reasoning_content 上），
+         也可能是代理改写了流。退回非流式再请求一次，避免给用户一个空回答。 */
+      once(false, function (text) {
+        onDone(text || '（接口没有返回内容）');
+      }, onError);
+    }, onError);
   }
 
   /* ---------- 界面 ---------- */
@@ -336,23 +353,33 @@
   }
 
   /* ---------- 启动 ---------- */
-  function loadConfig() {
+  /* 两级配置：ai-config.js（公开，随站点发布）→ ai-config.local.js（含 Key，已被 gitignore）
+     先捕获公开配置，再加载本地配置，最后合并——local 优先级更高。
+     本地文件不存在时静默跳过，线上因此不会因为缺文件而报错。 */
+  function loadScript(src) {
     return new Promise(function (resolve) {
-      if (window.KL_AI) return resolve(window.KL_AI);
       var s = document.createElement('script');
-      s.src = 'assets/js/ai-config.js';
-      s.onload = function () { resolve(window.KL_AI || {}); };
-      s.onerror = function () { resolve({}); };   /* 未创建配置文件时静默降级 */
+      s.src = src;
+      s.onload = function () { resolve(true); };
+      s.onerror = function () { resolve(false); };
       document.head.appendChild(s);
     });
   }
 
-  loadConfig().then(function (user) {
-    cfg = Object.assign({}, DEFAULTS, user || {});
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', build);
-    } else {
-      build();
-    }
-  });
+  loadScript('assets/js/ai-config.js')
+    .then(function () {
+      var pub = window.KL_AI || {};
+      return loadScript('assets/js/ai-config.local.js').then(function () {
+        var loc = window.KL_AI || {};
+        return Object.assign({}, DEFAULTS, pub, loc);
+      });
+    })
+    .then(function (user) {
+      cfg = user;
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+      } else {
+        build();
+      }
+    });
 })();

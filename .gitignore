@@ -7,8 +7,9 @@
 # 图片素材原始压缩包：处理后的成品已入 kanglu-dh/assets/img/
 数字人文图片.zip
 
-# AI 问答接口的本地配置（含 API Key，绝不入库）
-kanglu-dh/assets/js/ai-config.js
+# AI 问答的本地密钥配置（含 API Key，绝不入库）
+# 注意：ai-config.js 是公开配置，需要入库；只有 .local.js 含密钥
+kanglu-dh/assets/js/ai-config.local.js
 
 # xlsx 解析与临时脚本
 _xlsx_tmp/

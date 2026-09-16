@@ -8,6 +8,17 @@
    接口格式：OpenAI 兼容（POST /chat/completions，stream）。
    DeepSeek、通义千问、智谱、Moonshot、OpenAI 等都支持，换家只改下面三行。
 
+   已实测（DeepSeek）：
+   · 支持跨域——预检与实际响应都会回显请求的 Origin（含 null、本地端口、GitHub Pages），
+     所以浏览器直连在技术上可行；但 Key 一旦进入线上前端就等于公开，线上仍应走代理。
+   · 模型差异（重要）：
+       deepseek-chat     普通模型，直接返回 content —— 本站默认
+       deepseek-flash    推理模型，思考写进 reasoning_content，正式回答才在 content；
+       deepseek-v4-pro   两者都吃 token，maxTokens 给小了（如 800）content 会是空的。
+                         要用这两个，请把 maxTokens 调到 3000 左右。
+   · 若流式一个字都没收到，前端会自动退回非流式再请求一次（见 ai.js），
+     所以即使换成推理模型，也不会只给用户一个空回答。
+
    ⚠️ 两种用法只能选一种：
    ────────────────────────────────────────────────────────────
    方式一：浏览器直连（只适合本地演示）
