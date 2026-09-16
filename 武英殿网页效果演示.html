@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>武英殿 · 网页效果演示</title>
+<style>
+/* ============ 基础与古风配色 ============ */
+:root{
+  --paper:#f6f1e6;      /* 宣纸米色 */
+  --ink:#2b2b2b;        /* 墨色 */
+  --red:#8c1f28;        /* 朱红 */
+  --gold:#b8860b;       /* 鎏金 */
+  --gold-light:#d4af37;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  background-image:repeating-linear-gradient(0deg,rgba(139,105,20,.025) 0 1px,transparent 1px 28px);
+  color:var(--ink);
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+  overflow-x:hidden;
+}
+.serif{font-family:"STKaiti","KaiTi","STSong","SimSun",serif}
+
+/* ============ 1. 汉堡菜单 + 全屏导航 ============ */
+.hamburger{position:fixed;top:18px;left:18px;z-index:100;width:44px;height:44px;
+  background:rgba(43,43,43,.72);border:1px solid var(--gold-light);border-radius:4px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;transition:.3s}
+.hamburger span{display:block;width:22px;height:2px;background:var(--gold-light);transition:.35s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-overlay{position:fixed;inset:0;z-index:90;background:rgba(20,16,10,.94);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;
+  opacity:0;pointer-events:none;transition:opacity .45s}
+.nav-overlay.open{opacity:1;pointer-events:auto}
+.nav-overlay a{color:var(--paper);font-size:1.9rem;text-decoration:none;letter-spacing:.35em;
+  font-family:"STKaiti","KaiTi",serif;transform:translateY(24px);opacity:0;transition:.5s}
+.nav-overlay.open a{transform:none;opacity:1}
+.nav-overlay.open a:nth-child(1){transition-delay:.08s}
+.nav-overlay.open a:nth-child(2){transition-delay:.16s}
+.nav-overlay.open a:nth-child(3){transition-delay:.24s}
+.nav-overlay.open a:nth-child(4){transition-delay:.32s}
+.nav-overlay.open a:nth-child(5){transition-delay:.4s}
+.nav-overlay a:hover{color:var(--gold-light)}
+
+/* ============ 2. 首页:Canvas 水墨 + 标题渐入 + 印章动画 ============ */
+.hero{position:relative;height:92vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero .title{position:relative;z-index:2;text-align:center;animation:fadeUp 1.6s ease both}
+.hero .title h1{font-size:4.2rem;color:var(--ink);letter-spacing:.28em;font-weight:400;padding-left:.28em}
+.hero .title .sub{margin-top:14px;font-size:1.05rem;color:#5a4632;letter-spacing:.5em}
+.hero .divider{position:relative;z-index:2;width:220px;height:1px;margin:26px auto;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.seal{position:relative;z-index:2;width:72px;height:72px;background:var(--red);color:var(--paper);
+  display:grid;place-items:center;line-height:1.15;font-family:"STKaiti","KaiTi",serif;font-size:1.15rem;
+  border-radius:6px;transform:rotate(-8deg);box-shadow:0 4px 14px rgba(140,31,40,.45);
+  animation:stamp .7s 1s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{from{transform:scale(2.6) rotate(-8deg);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(46px)}}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;
+  color:#7a6a4f;font-size:.85rem;letter-spacing:.3em;animation:bob 1.8s ease-in-out infinite}
+.scroll-hint::after{content:"⌄";display:block;text-align:center;font-size:1.4rem}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+
+/* ============ 3. 滚动显现动画 ============ */
+.reveal{opacity:0;transform:translateY(46px);transition:opacity .9s ease,transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+.reveal.d1{transition-delay:.15s}.reveal.d2{transition-delay:.3s}.reveal.d3{transition-delay:.45s}
+
+/* ============ 通用区块 ============ */
+.section{padding:86px 6% 70px;max-width:1150px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:48px}
+.sec-head .mini-seal{display:inline-grid;place-items:center;width:34px;height:34px;background:var(--red);
+  color:var(--paper);font-family:"STKaiti","KaiTi",serif;font-size:.72rem;border-radius:4px;
+  transform:rotate(-6deg);margin-bottom:12px}
+.sec-head h2{font-family:"STKaiti","KaiTi",serif;font-size:2.2rem;font-weight:400;
+  letter-spacing:.24em;padding-left:.24em}
+.sec-head p{color:#8a7757;margin-top:10px;font-size:.92rem;letter-spacing:.14em}
+.sec-head .goldline{width:180px;height:1px;margin:18px auto 0;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+/* ============ 4. 轮播(人物卡片) ============ */
+.carousel{position:relative;overflow:hidden}
+.car-track{display:flex;transition:transform .55s cubic-bezier(.3,.8,.3,1)}
+.car-slide{flex:0 0 33.3333%;padding:0 12px}
+.fig-card{background:#fbf7ec;border:1px solid #d8c9a6;border-radius:6px;padding:26px 22px;
+  text-align:center;box-shadow:0 6px 18px rgba(90,70,40,.10);height:100%;transition:.35s}
+.fig-card:hover{transform:translateY(-7px);box-shadow:0 14px 28px rgba(90,70,40,.16);border-color:var(--gold)}
+.fig-avatar{width:74px;height:74px;margin:0 auto 14px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#efe3c8,#c9b285);
+  border:2px solid var(--gold);display:grid;place-items:center;
+  font-family:"STKaiti","KaiTi",serif;font-size:1.7rem;color:var(--red)}
+.fig-card h3{font-family:"STKaiti","KaiTi",serif;font-size:1.25rem;font-weight:400;letter-spacing:.1em}
+.fig-card .role{color:var(--gold);font-size:.82rem;margin:7px 0 11px;letter-spacing:.12em}
+.fig-card p{font-size:.84rem;color:#6b5c42;line-height:1.75;text-align:justify}
+.car-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;
+  border:1px solid var(--gold);border-radius:50%;background:rgba(246,241,230,.9);color:var(--red);
+  font-size:1.2rem;cursor:pointer;transition:.25s}
+.car-btn:hover{background:var(--red);color:var(--paper);border-color:var(--red)}
+.car-btn.prev{left:6px}.car-btn.next{right:6px}
+.car-dots{display:flex;justify-content:center;gap:9px;margin-top:24px}
+.car-dots i{width:9px;height:9px;border-radius:50%;background:#cbb98e;cursor:pointer;transition:.3s}
+.car-dots i.active{background:var(--red);transform:scale(1.35)}
+
+/* ============ 5. 线装书翻页(3D) ============ */
+.book-wrap{perspective:1800px;max-width:760px;margin:0 auto}
+.book{position:relative;height:430px;transform-style:preserve-3d}
+.sheet{position:absolute;inset:0;background:#e9dcbe;border:1px solid #b7a06b;border-radius:3px;
+  display:grid;place-items:center;transform-origin:left center;transition:transform 1.15s cubic-bezier(.4,.1,.2,1);
+  backface-visibility:hidden;box-shadow:0 8px 26px rgba(70,50,20,.25)}
+.sheet.flipped{transform:rotateY(-180deg)}
+.sheet .front,.sheet .back{position:absolute;inset:0;display:grid;place-items:center;padding:30px;
+  text-align:center;backface-visibility:hidden}
+.sheet .front{background:#e9dcbe}
+.sheet .back{background:#e3d3ae;transform:rotateY(180deg)}
+.book-cover{width:100%;height:100%;border:2px solid #6d5424;border-radius:3px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;
+  background:linear-gradient(160deg,#d9c69a,#c3a96f)}
+.book-cover .label{background:var(--red);color:#f4ead4;padding:7px 26px;font-family:"STKaiti","KaiTi",serif;
+  font-size:1.35rem;letter-spacing:.3em;padding-left:.3em;border-radius:2px}
+.book-cover .vol{color:#5a4632;letter-spacing:.4em;padding-left:.4em;font-size:.85rem}
+.book-pages{font-family:"STKaiti","KaiTi",serif;font-size:1.02rem;line-height:2;color:#4a3b22}
+.book-pages h3{font-size:1.3rem;color:var(--red);margin-bottom:12px;letter-spacing:.16em;font-weight:400}
+.book-pages p{max-width:480px;font-size:.95rem;line-height:1.9;color:#5a4a2c}
+.book-ctrl{display:flex;justify-content:center;align-items:center;gap:26px;margin-top:28px}
+.book-ctrl button{border:1px solid var(--gold);background:transparent;color:var(--red);
+  font-family:"STKaiti","KaiTi",serif;font-size:1rem;letter-spacing:.2em;padding:8px 26px;
+  cursor:pointer;border-radius:3px;transition:.3s}
+.book-ctrl button:hover{background:var(--red);color:var(--paper);border-color:var(--red)}
+.book-ctrl .page-no{color:#8a7757;letter-spacing:.2em;font-size:.9rem}
+
+/* ============ 6. 纵向时间轴 ============ */
+.timeline{position:relative;max-width:860px;margin:0 auto;padding-left:34px}
+.timeline::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,transparent,var(--gold) 8%,var(--gold) 92%,transparent)}
+.tl-item{position:relative;margin-bottom:40px}
+.tl-item::before{content:"";position:absolute;left:-31px;top:7px;width:12px;height:12px;
+  border-radius:50%;background:var(--red);border:2px solid var(--paper);box-shadow:0 0 0 2px var(--gold)}
+.tl-item .year{font-family:"STKaiti","KaiTi",serif;font-size:1.35rem;color:var(--red);letter-spacing:.08em}
+.tl-item h4{font-family:"STKaiti","KaiTi",serif;font-size:1.1rem;font-weight:400;margin:5px 0 8px;letter-spacing:.1em}
+.tl-item p{font-size:.88rem;color:#6b5c42;line-height:1.8;max-width:640px}
+
+/* ============ 页脚 ============ */
+footer{background:var(--ink);color:#c9bda1;text-align:center;padding:34px 6%;
+  font-family:"STKaiti","KaiTi",serif;letter-spacing:.3em;font-size:.9rem;margin-top:30px}
+
+/* 响应式 */
+@media(max-width:820px){
+  .car-slide{flex:0 0 100%}
+  .hero .title h1{font-size:2.6rem}
+  .book{height:340px}
+}
+</style>
+</head>
+<body>
+
+<!-- 汉堡菜单 -->
+<button class="hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+<nav class="nav-overlay" id="navOverlay">
+  <a href="#intro">殿宇简介</a>
+  <a href="#figures">相关人物</a>
+  <a href="#books">殿本图书</a>
+  <a href="#history">历史脉络</a>
+  <a href="#print">刻书印艺</a>
+</nav>
+
+<!-- 首页:CANVAS 水墨山峦 + 渐入标题 + 印章 -->
+<header class="hero">
+  <canvas id="inkCanvas"></canvas>
+  <div class="title">
+    <h1 class="serif">武英殿</h1>
+    <p class="sub">皇 家 刻 书 之 所</p>
+    <div class="divider"></div>
+  </div>
+  <div class="seal">武英<br>殿宝</div>
+  <div class="scroll-hint">向下浏览</div>
+</header>
+
+<!-- 简介 -->
+<section class="section" id="intro">
+  <div class="sec-head reveal">
+    <span class="mini-seal">殿</span>
+    <h2>殿宇简介</h2>
+    <div class="goldline"></div>
+  </div>
+  <p class="reveal d1" style="text-align:justify;font-size:.95rem;line-height:2.1;color:#5a4a2c;max-width:820px;margin:0 auto">
+    武英殿始建于明朝永乐初年,在紫禁城中占有重要地位,是紫禁城中相对独立、对称的建筑群落之一。
+    它处于外朝西路,与太和殿东侧的文华殿构成左辅右弼之势。康熙十九年(1680)清廷在武英殿设立修书处,
+    成为负责内府典籍刊刻、装潢的最主要机构。凡武英殿刊印的内府书籍通称"殿本",其装潢水准、纸墨质量、
+    校勘精细程度、写刻水平皆为清代之冠。
+  </p>
+  <p class="reveal d2" style="text-align:center;margin-top:34px;font-family:'STKaiti','KaiTi',serif;
+     font-size:1.15rem;color:var(--red);letter-spacing:.3em">—— 明清两代六百余年,书香不绝 ——</p>
+</section>
+
+<!-- 人物轮播 -->
+<section class="section" id="figures" style="background:rgba(139,105,20,.05);max-width:none">
+  <div style="max-width:1150px;margin:0 auto">
+    <div class="sec-head reveal">
+      <span class="mini-seal">人</span>
+      <h2>相关人物</h2>
+      <p>轮播 · 自动播放,悬停暂停</p>
+      <div class="goldline"></div>
+    </div>
+    <div class="carousel reveal" id="carousel">
+      <div class="car-track" id="carTrack">
+        <div class="car-slide"><div class="fig-card">
+          <div class="fig-avatar">闯</div><h3>李自成</h3>
+          <div class="role">明末农民起义领袖</div>
+          <p>明末农民起义领袖,世居陕西米脂。攻入北京后火烧武英殿,在武英殿举行即位典礼。武英殿由此与这位"闯王"结下不解之缘。</p>
+        </div></div>
+        <div class="car-slide"><div class="fig-card">
+          <div class="fig-avatar">熙</div><h3>康熙帝</h3>
+          <div class="role">下令设立武英殿修书处</div>
+          <p>清朝第四位皇帝,在位六十一年。康熙十九年(1680)下令将武英殿改为刻书机构,设修书处,开创了延续二百余年的殿本刊刻事业。</p>
+        </div></div>
+        <div class="car-slide"><div class="fig-card">
+          <div class="fig-avatar">雷</div><h3>陈梦雷</h3>
+          <div class="role">古今图书集成馆总裁</div>
+          <p>福建闽县人,著名学者、文献学家。主持编纂万卷类书《古今图书集成》,由武英殿铜活字排印,共铸铜活字一百余万个。</p>
+        </div></div>
+        <div class="car-slide"><div class="fig-card">
+          <div class="fig-avatar">简</div><h3>金简</h3>
+          <div class="role">监武英殿刻书、《四库全书》副总裁</div>
+          <p>乾隆中主持武英殿刻书事务,奏请以木活字排印从《永乐大典》辑出之珍本秘籍,即赫赫有名的"武英殿聚珍版"。</p>
+        </div></div>
+        <div class="car-slide"><div class="fig-card">
+          <div class="fig-avatar">湘</div><h3>陶湘</h3>
+          <div class="role">目录学家、藏书家、刻书家</div>
+          <p>原籍江苏武进,近代藏书名家,雅爱殿本,藏殿本及开化纸印本极富,编有《故宫殿本书库现存目》等目录学著作。</p>
+        </div></div>
+      </div>
+      <button class="car-btn prev" id="carPrev">‹</button>
+      <button class="car-btn next" id="carNext">›</button>
+    </div>
+    <div class="car-dots" id="carDots"></div>
+  </div>
+</section>
+
+<!-- 翻书 -->
+<section class="section" id="books">
+  <div class="sec-head reveal">
+    <span class="mini-seal">书</span>
+    <h2>殿本图书 · 线装书翻页</h2>
+    <p>点击按钮或按 ← → 键翻页(3D 翻书效果)</p>
+    <div class="goldline"></div>
+  </div>
+  <div class="book-wrap reveal d1">
+    <div class="book" id="book"></div>
+  </div>
+  <div class="book-ctrl reveal d2">
+    <button id="bookPrev">‹ 上一页</button>
+    <span class="page-no" id="pageNo">1 / 4</span>
+    <button id="bookNext">下一页 ›</button>
+  </div>
+</section>
+
+<!-- 时间轴 -->
+<section class="section" id="history" style="background:rgba(139,105,20,.05);max-width:none">
+  <div style="max-width:1150px;margin:0 auto">
+    <div class="sec-head reveal">
+      <span class="mini-seal">史</span>
+      <h2>历史脉络</h2>
+      <p>滚动显现的时间轴</p>
+      <div class="goldline"></div>
+    </div>
+    <div class="timeline">
+      <div class="tl-item reveal"><div class="year">明永乐初年</div>
+        <h4>武英殿始建</h4>
+        <p>武英殿始建于明朝永乐初年,为紫禁城西路的独立建筑群落,武英门前御河环绕,上跨石桥三座。</p></div>
+      <div class="tl-item reveal"><div class="year">康熙十九年(1680)</div>
+        <h4>设立修书处</h4>
+        <p>清廷在武英殿正式设立修书处,下设刻字作、刷印作等四个常设作坊,殿本刊刻事业由此开启。</p></div>
+      <div class="tl-item reveal"><div class="year">康熙五十五年(1716)</div>
+        <h4>铜活字印《古今图书集成》</h4>
+        <p>为印刷万卷类书《古今图书集成》,设立铜字馆,铸造铜活字一百余万个,成就中国铜活字印刷史上卷帙最浩繁的典籍。</p></div>
+      <div class="tl-item reveal"><div class="year">乾隆三十八年(1773)</div>
+        <h4>武英殿聚珍版</h4>
+        <p>金简主持以木活字排印《永乐大典》辑出古书,"聚珍版"由此得名,风靡士林。</p></div>
+      <div class="tl-item reveal"><div class="year">1914年</div>
+        <h4>古物陈列所</h4>
+        <p>辛亥革命后武英殿收归民国政府,热河、奉天行宫古物移运北京,武英殿辟为古物陈列所,正式向公众开放。</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>武英殿 · 网页交互效果演示　|　Canvas 水墨 · 轮播 · 3D 翻书 · 滚动动画 · 时间轴</footer>
+
+<script>
+/* ============ 1. 汉堡菜单 ============ */
+const burger=document.getElementById('hamburger'),nav=document.getElementById('navOverlay');
+burger.addEventListener('click',()=>{burger.classList.toggle('open');nav.classList.toggle('open')});
+nav.addEventListener('click',e=>{if(e.target.tagName==='A'){burger.classList.remove('open');nav.classList.remove('open')}});
+
+/* ============ 2. Canvas 水墨:远山剪影 + 升腾墨点 ============ */
+(function(){
+  const cv=document.getElementById('inkCanvas'),ctx=cv.getContext('2d');
+  let W,H,ridges,dots=[];
+  function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;
+    ridges=[[.62,.30],[.55,.22],[.68,.26],[.5,.18],[.6,.2]].map(r=>({
+      base:H*r[0],amp:H*r[1],freq:1.6+Math.random(),sp:Math.random()*6,
+      shade:120+Math.floor(Math.random()*60)}));
+    dots=Array.from({length:26},()=>({x:Math.random()*W,y:H*0.55+Math.random()*H*0.45,
+      r:1+Math.random()*3.5,v:0.25+Math.random()*0.6,a:Math.random()*0.5}));
+  }
+  size();addEventListener('resize',size);
+  let t=0;
+  (function tick(){
+    ctx.clearRect(0,0,W,H);t+=0.006;
+    ridges.forEach((r,i)=>{                       /* 山峦剪影 */
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=6){
+        const y=r.base+r.amp*Math.sin(x/W*r.freq*Math.PI*2+r.sp+t*(i%2?1:-1));
+        x?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+      ctx.fillStyle=`rgba(${r.shade},${r.shade-25},${r.shade-60},.5)`;ctx.fill();
+    });
+    dots.forEach(d=>{                              /* 升腾墨点 */
+      d.y-=d.v;d.a-=.002;
+      if(d.y<H*0.3||d.a<=0){d.y=H*0.55+Math.random()*H*0.45;d.a=Math.random()*0.5}
+      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,7);
+      ctx.fillStyle=`rgba(40,30,15,${d.a})`;ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  })();
+})();
+
+/* ============ 3. 滚动显现 ============ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}
+}),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ============ 4. 人物轮播 ============ */
+(function(){
+  const track=document.getElementById('carTrack'),
+        slides=track.children,n=slides.length,dotsBox=document.getElementById('carDots');
+  let idx=0,per=window.innerWidth>820?3:1,limit=n-per,timer;
+  const dots=[];
+  for(let i=0;i<=limit;i++){const d=document.createElement('i');
+    d.addEventListener('click',()=>go(i));dotsBox.appendChild(d);dots.push(d)}
+  function go(i){idx=Math.max(0,Math.min(i,limit));
+    track.style.transform=`translateX(-${idx*100/per}%)`;
+    dots.forEach((d,j)=>d.classList.toggle('active',j===idx))}
+  function next(){go(idx>=limit?0:idx+1)}
+  function prev(){go(idx<=0?limit:idx-1)}
+  document.getElementById('carNext').addEventListener('click',next);
+  document.getElementById('carPrev').addEventListener('click',prev);
+  function autoplay(){timer=setInterval(next,3500)}
+  function stop(){clearInterval(timer)}
+  document.getElementById('carousel').addEventListener('mouseenter',stop);
+  document.getElementById('carousel').addEventListener('mouseleave',autoplay);
+  addEventListener('resize',()=>{per=innerWidth>820?3:1;limit=n-per;dotsBox.innerHTML='';
+    dots.length=0;for(let i=0;i<=limit;i++){const d=document.createElement('i');
+      d.addEventListener('click',()=>go(i));dotsBox.appendChild(d);dots.push(d)}go(0)});
+  go(0);autoplay();
+})();
+
+/* ============ 5. 3D 翻书 ============ */
+(function(){
+  const book=document.getElementById('book'),pageNo=document.getElementById('pageNo');
+  const pages=[
+    {front:null,back:{h:'《古今图书集成》',t:'我国现存古代最大的一部类书。康熙年间铸铜活字一百余万个,由武英殿排印,是中国铜活字印刷史上卷帙最为浩繁的典籍。'}},
+    {front:{h:'儒家经典',t:'武英殿刊刻的儒家经典不胜枚举:顺治《御注孝经》、乾隆《日讲春秋解义》《钦定四书文》等,体现清廷"稽古右文"的文化政策。'},
+     back:{h:'御制诗文集',t:'武英殿负责刊刻历朝皇帝御制诗文集,作为宫廷陈设或赏赐品。康、雍、乾、嘉四朝为其高峰期。'}},
+    {front:{h:'史书与方略',t:'史书在殿本中比重甚大,如康熙朝《御批资治通鉴纲目全书》《明史》,以及《平定两金川方略》《平定准噶尔方略》等方略、纪略。'},
+     back:{h:'典章政书',t:'典章制度、律令则例等政书占据较大比重,如《钦定重修六部处分则例》,起辅政之用,保障国家机器运转。'}},
+    {front:{h:'武英殿聚珍版',t:'乾隆三十八年(1773)设聚珍馆,金简主持以木活字排印《永乐大典》辑出古书,名"聚珍版",存世之书今为古籍珍本。'},back:null},
+  ];
+  const sheets=[];let cur=0;
+  pages.forEach((pg,i)=>{
+    const s=document.createElement('div');s.className='sheet';s.style.zIndex=pages.length-i;
+    const f=document.createElement('div');f.className='front';
+    if(i===0){f.innerHTML=`<div class="book-cover"><div class="label">殿本图书</div>
+      <div class="vol">武 英 殿 刻 书</div></div>`}
+    else if(pg.front){f.innerHTML=`<div class="book-pages"><h3>${pg.front.h}</h3><p>${pg.front.t}</p></div>`}
+    else{f.innerHTML='<div class="book-cover" style="background:linear-gradient(160deg,#c3a96f,#d9c69a)"><div class="vol">全书完 · 共四页</div></div>'}
+    const b=document.createElement('div');b.className='back';
+    if(pg.back){b.innerHTML=`<div class="book-pages"><h3>${pg.back.h}</h3><p>${pg.back.t}</p></div>`}
+    s.appendChild(f);s.appendChild(b);book.appendChild(s);sheets.push(s);
+  });
+  function show(){pageNo.textContent=(cur+1)+' / '+pages.length}
+  function flip(dir){const i=cur+(dir>0?1:-1);
+    if(i<0||i>=pages.length)return;
+    if(dir>0)sheets[cur].classList.add('flipped');
+    else{cur--;sheets[cur].classList.remove('flipped')}
+    cur=Math.max(0,Math.min(cur,pages.length-1));show()}
+  document.getElementById('bookNext').addEventListener('click',()=>flip(1));
+  document.getElementById('bookPrev').addEventListener('click',()=>flip(-1));
+  addEventListener('keydown',e=>{if(e.key==='ArrowRight')flip(1);if(e.key==='ArrowLeft')flip(-1)});
+  show();
+})();
+</script>
+</body>
+</html>
