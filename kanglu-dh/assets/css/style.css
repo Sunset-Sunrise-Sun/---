@@ -773,38 +773,88 @@ section[id]{ scroll-margin-top:84px; }
 }
 
 /* ============================================================
-   图文配图（二级页）
+   影像与图文（二级页）
    ------------------------------------------------------------
-   多列行内的图片统一裁成 4:3 以便对齐；单张通栏图与图件类不裁切，
-   按原比例完整呈现（规划图、展板等信息量大的图必须完整）。
+   分工：照片 = 氛围（影像带 / 错位大图），图件 = 材料（纸色面板）。
+   文字与图片的关系遵循三条硬规则：
+     1. 正文永远在纸色底上；只有影像带的标题压在图上，且必须压在
+        已完全过渡到纸色的那一段；
+     2. 图注永远在图的下方，不压在图上；
+     3. 数字与引语不用图承载，照片只负责氛围与现场感。
+   底色一律保持纸色系：首页的深色封面是全站唯一的深色。
    ============================================================ */
-.fig-row{ display:grid; gap:22px; margin-top:48px; }
-.fig-row.cols-2{ grid-template-columns:1fr 1fr; }
-.fig-row.cols-3{ grid-template-columns:repeat(3,1fr); }
 
-figure.fig{ margin:0; }
-figure.fig img{
+/* 统一色调：把黄昏偏蓝、白炽灯、白光等不同色温的照片拉进同一暖纸色系 */
+.band-img, .feature-media img, .panel img{
+  filter:saturate(.9) contrast(1.03) brightness(1.02);
+}
+
+/* ① 全幅影像带 */
+section.has-band{ padding-top:0; }
+.band{ position:relative; overflow:hidden; display:flex; align-items:flex-end;
+  height:clamp(320px, 44vh, 520px); }
+.band.short{ height:clamp(220px, 32vh, 380px); }
+.band-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.band-veil{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg,
+    rgba(250,247,240,.42) 0%, rgba(250,247,240,.16) 32%,
+    rgba(250,247,240,.76) 70%, var(--paper) 99%);
+}
+.band-cap{ position:relative; z-index:2; width:100%; padding-bottom:22px; }
+.band-kicker{
+  display:flex; align-items:center; gap:10px; margin:0 0 10px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--red);
+}
+.band-kicker::before{ content:""; width:26px; height:1px; background:var(--red); }
+.band-title{
+  font-family:var(--serif); font-weight:700; letter-spacing:.01em; line-height:1.3;
+  font-size:clamp(26px, 3.4vw, 42px); color:var(--ink); margin:0 0 10px;
+}
+.band-sub{ font-size:15px; line-height:1.9; color:var(--ink-2); max-width:60ch; margin:0; }
+
+/* ② 错位图文：大图 + 侧栏文字（.flip 左右互换） */
+.feature{ display:grid; grid-template-columns:1.25fr .8fr; gap:48px; align-items:center; margin-top:60px; }
+.feature.flip{ grid-template-columns:.8fr 1.25fr; }
+.feature.flip .feature-media{ order:2; }
+.feature-media{ position:relative; margin:0; }
+.feature-media img{
   width:100%; height:auto; display:block;
   border:1px solid var(--line); border-radius:var(--radius);
-  background:var(--paper-3);
 }
-.fig-row.cols-2 figure.fig img,
-.fig-row.cols-3 figure.fig img{ aspect-ratio:4 / 3; object-fit:cover; }
+.feature-media figcaption{
+  margin-top:10px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3);
+}
+.feature-body h3{ font-family:var(--serif); font-size:24px; margin:0 0 14px; }
+.feature-body p{ font-size:15px; line-height:2; color:var(--ink-2); margin:0 0 14px; }
+.feature-body p:last-child{ margin-bottom:0; }
 
-figure.fig figcaption{
-  margin-top:11px; font-size:12.5px; line-height:1.85; color:var(--ink-3);
+/* ③ 纸色面板：图件类（展板、规划图）以「材料」的方式完整呈现 */
+.panel{
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px; box-shadow:var(--shadow-sm); margin:0;
 }
-figure.fig figcaption b{ color:var(--ink-2); font-weight:600; }
-figure.fig figcaption .src{
-  display:block; margin-top:4px;
-  font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--ink-3);
+.panel img{ width:100%; height:auto; display:block; border-radius:2px; }
+.panel-tag{
+  display:inline-block; margin-bottom:12px; font-family:var(--mono); font-size:10px;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3);
+  border:1px solid var(--line); border-radius:2px; padding:2px 8px; background:var(--paper-2);
 }
+.panel figcaption{ margin-top:14px; font-size:12.5px; line-height:1.85; color:var(--ink-3); }
+.panel figcaption b{ color:var(--ink-2); font-weight:600; }
+.panel figcaption .src{ display:block; margin-top:5px; font-family:var(--mono); font-size:10.5px; }
+
+/* 面板成对排列 */
+.panel-row{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:56px; }
 
 @media (max-width:1080px){
-  .fig-row.cols-3{ grid-template-columns:1fr 1fr; }
+  .feature, .feature.flip{ grid-template-columns:1fr; gap:26px; align-items:start; }
+  .feature.flip .feature-media{ order:0; }
 }
 @media (max-width:760px){
-  .fig-row.cols-2,
-  .fig-row.cols-3{ grid-template-columns:1fr; gap:18px; }
-  .fig-row{ margin-top:34px; }
+  .band{ height:clamp(260px, 34vh, 380px); }
+  .band.short{ height:clamp(190px, 26vh, 300px); }
+  .band-cap{ padding-bottom:16px; }
+  .feature{ margin-top:38px; }
+  .panel-row{ grid-template-columns:1fr; gap:18px; margin-top:38px; }
 }
