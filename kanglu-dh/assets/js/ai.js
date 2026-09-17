@@ -113,11 +113,22 @@
   }
 
   /* ---------- 检索 ---------- */
+  /* 提问里的疑问词与虚词不参与匹配：
+     否则「这里有什么好吃的」会因为「有什」「什么」这种二字组命中任何一段，
+     返回一段毫不相干的资料（实测踩过）。 */
+  var STOP_PHRASES = ['什么', '怎么', '怎样', '如何', '哪里', '哪个', '哪些', '多少', '几位',
+    '几个', '请问', '介绍', '告诉', '一下', '是不是', '有没有', '为什么', '这个', '那个',
+    '你们', '我们', '能不能', '可以'];
+  var STOP_CHARS = '的了是在有和与及这那它们吗呢吧啊呀哦嘛你我的地得就都也很会被把给对从到为以要能';
+
   function gramsOf(q) {
-    var clean = String(q).replace(/[？?。，,、\s「」（）()：:]/g, '');
+    var clean = String(q).replace(/[？?。，,、\s「」（）()：:！!；;“”"']/g, '');
+    STOP_PHRASES.forEach(function (p) { clean = clean.split(p).join(''); });
+    clean = clean.split('').filter(function (ch) { return STOP_CHARS.indexOf(ch) < 0; }).join('');
+    if (clean.length < 2) return [];
     var g = [];
     for (var i = 0; i < clean.length - 1; i++) g.push(clean.slice(i, i + 2));
-    return g.length ? g : [clean];
+    return g;
   }
 
   function rank(q) {
@@ -141,15 +152,19 @@
     var list = rank(q);
     var top = list[0];
     if (!top || top.score < 1) {
-      return '这个问题在项目资料里没有找到对应记录。可以换个问法，或者从「背景资料」「康鹭地图」「人物档案」三页翻起。';
+      /* 不给死胡同：说清这里有什么，并给几个能问的入口 */
+      return '这个我没记下来。\n\n我这儿存的主要是康鹭片区的制衣产业、空间与人：\n'
+        + '· 为什么被叫作「制衣村」\n· 「小单快反」怎么运转\n· 招工广场（原鹭江球场）的来历\n'
+        + '· 旧改走到哪一步了\n· 4 份田野访谈档案\n\n换个问法可能就有了。\n\n'
+        + '[去「康鹭记忆」首页看看 →](index.html)';
     }
-    var out = [clip(top.text, 220)];
+    var parts = ['站内资料里与这个问题相关的部分：', '· ' + clip(top.text, 220)];
     var second = list[1];
     if (second && second.text !== top.text && second.score >= top.score - 1) {
-      out.push(clip(second.text, 160));
+      parts.push('· ' + clip(second.text, 160));
     }
-    return '（本地检索结果，未接入 AI 模型）\n\n' + out.join('\n\n') +
-      '\n\n[去「' + top.section + '」看看 →](' + top.link + ')';
+    return parts.join('\n') + '\n\n（站内检索模式，未接入大模型）'
+      + '\n[去「' + top.section + '」看看 →](' + top.link + ')';
   }
 
   /* ---------- 站内目录：链接只能从这里挑 ---------- */
@@ -370,7 +385,7 @@
 
     bubble('bot', DEFAULTS.intro + (isConfigured()
       ? ''
-      : '\n\n（当前未配置大模型接口，回答来自站内数据的本地检索。配置方法见 assets/js/ai-config.example.js）'));
+      : '\n\n（现在是站内检索模式：回答来自本站已整理的数据，没有接入大模型）'));
 
     restorePos();
     initBirdDrag();
