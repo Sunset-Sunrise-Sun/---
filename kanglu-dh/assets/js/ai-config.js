@@ -15,8 +15,9 @@
 
 window.KL_AI = {
 
-  /* 自建代理地址，例如 'https://kanglu-ai.你的账号.workers.dev' */
-  proxyUrl:  '',
+  /* 自建代理地址（Cloudflare Worker，Key 存在服务端）。
+     本机若存在含 Key 的 ai-config.local.js，会优先直连、忽略这里。 */
+  proxyUrl:  'https://kanglu-ai.kanglu-memory.workers.dev',
   proxyPath: '/chat',
 
   /* 人格设定：AI 的身份与说话方式（不填则用 ai.js 内置的小白鹭设定）。

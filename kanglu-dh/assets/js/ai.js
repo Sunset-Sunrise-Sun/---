@@ -225,18 +225,25 @@
   }
 
   /* ---------- 接口调用（OpenAI 兼容） ---------- */
+  /* 优先级：本机有 Key 就走直连（本地演示更直接），
+     否则走代理（线上唯一不泄露 Key 的方式）。 */
+  function useProxy() {
+    return !cfg.apiKey && !!cfg.proxyUrl;
+  }
+
   function endpoint() {
-    if (cfg.proxyUrl) return cfg.proxyUrl.replace(/\/$/, '') + (cfg.proxyPath || '/chat');
+    if (useProxy()) return cfg.proxyUrl.replace(/\/$/, '') + (cfg.proxyPath || '/chat');
     if (cfg.baseUrl) return cfg.baseUrl.replace(/\/$/, '') + '/chat/completions';
     return '';
   }
 
   function ask(q, onDelta, onDone, onError) {
     var url = endpoint();
-    if (!url || (!cfg.apiKey && !cfg.proxyUrl)) {
+    if (!url || (!cfg.apiKey && !useProxy())) {
       onDone(localAnswer(q));
       return;
     }
+    var viaProxy = useProxy();
 
     var messages = [
       { role: 'system', content: systemPrompt(q) },
@@ -251,12 +258,12 @@
         stream: !!stream
       };
       /* 走自建代理时，模型名与 key 由代理端决定，前端不传 */
-      if (!cfg.proxyUrl) b.model = cfg.model;
+      if (!viaProxy) b.model = cfg.model;
       return JSON.stringify(b);
     }
 
     var headers = { 'Content-Type': 'application/json' };
-    if (!cfg.proxyUrl && cfg.apiKey) headers.Authorization = 'Bearer ' + cfg.apiKey;
+    if (!viaProxy && cfg.apiKey) headers.Authorization = 'Bearer ' + cfg.apiKey;
 
     /* stream=true 时边收边吐；onText 在结束时给出完整文本 */
     function once(stream, onText, onFail) {
@@ -309,7 +316,7 @@
 
   /* ---------- 界面 ---------- */
   function isConfigured() {
-    return !!(cfg.proxyUrl || (cfg.baseUrl && cfg.apiKey && cfg.model));
+    return useProxy() || !!(cfg.baseUrl && cfg.apiKey && cfg.model);
   }
 
   /* 默认形象：一只小白鹭（鹭江的「鹭」），纯 SVG，零依赖。
@@ -663,10 +670,14 @@
       },
       function (err) {
         out.classList.remove('typing');
-        out.textContent = '调用接口失败：' + (err && err.message ? err.message : err) +
-          '\n\n可能是浏览器直连被 CORS 拦下了。线上使用建议改走自建代理（见 assets/js/ai-config.example.js 里的 Cloudflare Worker 示例）。';
+        /* 接口不可用时不要甩一个报错框给用户：
+           退回站内检索照常作答（例如 workers.dev 在部分网络下不可达） */
+        if (window.console && console.warn) console.warn('AI 接口不可用，已退回站内检索：', err);
+        renderRich(out, localAnswer(q)
+          + '\n\n（大模型接口本次没能连上，以上为站内检索结果）');
         busy = false;
         els.send.disabled = false;
+        scheduleFit();
       }
     );
   }
