@@ -12,4 +12,6 @@ compatibility_date = "2024-11-01"
 MODEL = "deepseek-chat"
 # 允许的来源，逗号分隔；null 表示本地用 file:// 打开时的来源。
 # 留空或不写 = 不校验来源（方便调试，但别人也能白用你的额度）。
-ALLOW_ORIGINS = "https://sunset-sunrise-sun.github.io,null"
+# 线上站点来源 + 本地 http:// 调试来源（127.0.0.1/localhost 的本地服务器，
+# 用来在"有域名"的环境下验证代理链路；这两条只对本机生效，不构成线上暴露）。
+ALLOW_ORIGINS = "https://sunset-sunrise-sun.github.io,null,http://127.0.0.1:8099,http://localhost:8099"

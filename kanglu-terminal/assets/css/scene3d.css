@@ -1,0 +1,287 @@
+/* ============================================================================
+ *  康鹭记忆 · 三维微缩街区样式  scene3d.css
+ *  ---------------------------------------------------------------------------
+ *  约定：
+ *   - 所有类名以 .k3d- 前缀，且只在容器内部生效（容器由 initScene 加 .k3d-host）
+ *   - 容器本身 touch-action:none 让移动端单指旋转生效；
+ *     标签层 .k3d-labels 用 pointer-events:none 穿透，只有标签本体可点，
+ *     所以容器以外的整页滚动完全不受影响。
+ *   - 颜色沿用全站变量（--paper / --ink / --red …），变量缺失时有兜底值。
+ * ==========================================================================*/
+
+.k3d-host {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #F3ECDE 0%, #E7DFCF 55%, #DCD4C4 100%);
+  /* 场景内不做页面滚动，触摸交给画布处理 */
+  touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+  isolation: isolate;
+}
+
+.k3d-host.is-grabbing { cursor: grabbing; }
+
+/* WebGL 不可用时的降级外观：容器里什么也没有，给一个安静的提示底 */
+.k3d-host.k3d-unsupported {
+  cursor: default;
+  background:
+    repeating-linear-gradient(45deg, rgba(48, 45, 40, .035) 0 10px, transparent 10px 20px),
+    linear-gradient(180deg, #F3ECDE, #E4DDCE);
+}
+
+.k3d-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* 移动端：单指旋转、双指缩放，且不允许浏览器接管为滚动/缩放 */
+  touch-action: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------------------------------------------------------------- 标签层 */
+.k3d-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  /* 整层不接收事件，保证拖拽不被标签打断；只有标签按钮自己接收 */
+  pointer-events: none;
+  font-family: var(--sans, "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif);
+}
+
+/* 场内标针的定位壳：26×34 的透明按钮（针高 34），视觉全在内层 SVG 上。
+   为什么高一点：标针是"上圆下尖"，底边（针尖）要压在锚点上，
+   JS 的落位公式是 translate3d(x - w/2, y - h)，所以壳高必须等于整根针高。
+   （类名 .k3d-label 沿用不改，map3d 用它按 data-id 找屏幕位置弹地点卡片。） */
+.k3d-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 22px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink, #302D28);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: opacity .18s linear;
+  will-change: transform, opacity;
+}
+
+/* ---------------------------------------------------------------- 场内标针
+   场景里**只放水滴状标针**（上圆下尖，数字在圆头里），不放"名称 + 副标题"文字：
+   文字一律交给场景下方的图例（#placeLegend）。
+   关键约定：**针尖（SVG 里的 (13,34)）就是锚点** —— 落位时元件底边压在该点上，
+   于是"指哪一栋"没有歧义。
+   注意：外层 .k3d-label 的 transform 每帧被定位占用，
+   所以"悬停放大"做在内层 .k3d-pin 上，且 transform-origin 放在针尖（50% 100%），
+   放大时针尖不动、只长圆头。 */
+.k3d-label .k3d-pin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 100%;      /* 以针尖为缩放基点 */
+  filter: drop-shadow(0 1px 1.5px rgba(48,45,40, .3));
+  transition: transform .12s ease, filter .12s ease;
+}
+
+/* 针身：**墨灰实底 + 纸白数字**（次级 04–11）。
+   为什么不用"纸白底 + 墨灰描边"：8× 放大后逐像素量过 —— 纸白底是 (238,232,218)，
+   浅色水泥地是 (216,210,196)，两者只差 22 级，于是针体在浅底上读起来就是
+   "一枚白针压出一圈白边"（描边其实是深色 (48,45,40)、投影也是深色，都不是白边来源，
+   白边就是纸白 fill 本身）。墨灰实底在任何底色上都压得住，
+   也与 01–03 的"砖红实底 + 纸白数字"同一逻辑，只换颜色不换主次。 */
+.k3d-label .k3d-pin-body {
+  fill: var(--ink, #302D28);
+  stroke: var(--ink, #302D28);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.k3d-label .k3d-pin-num {
+  fill: #F1EBDD;                    /* 纸白（= 配色常量里的 paper） */
+  font-family: var(--mono, ui-monospace, "SFMono-Regular", Consolas, monospace);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* 核心三处（01–03）保持砖红实底 + 纸白数字 —— 与图例里的标记一致 */
+.k3d-label.is-primary .k3d-pin-body {
+  fill: var(--red, #B84A3A);
+  stroke: var(--red, #B84A3A);
+}
+.k3d-label.is-primary .k3d-pin-num { fill: #F7F1E4; }
+
+/* 针尖下的极小落点椭圆（半透明墨灰）：帮眼睛确认"扎在哪一点" */
+.k3d-label::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1.5px;
+  width: 5px;
+  height: 2.2px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: rgba(48,45,40, .3);
+}
+
+/* 悬停 / 键盘聚焦 → 圆头放大一点（图例里对应条目的高亮由 map3d 负责） */
+.k3d-label:hover .k3d-pin,
+.k3d-label:focus-visible .k3d-pin,
+.k3d-label.is-hover .k3d-pin {
+  transform: scale(1.2);
+}
+.k3d-label:focus-visible { outline: none; }
+
+/* 选中（点标针或点图例条目都会走到这里）：描边加粗 + 砖红外发光 */
+.k3d-label.is-selected .k3d-pin-body {
+  stroke: var(--red, #B84A3A);
+  stroke-width: 2.4;
+}
+.k3d-label.is-selected .k3d-pin {
+  filter: drop-shadow(0 0 3px rgba(184,74,58, .55)) drop-shadow(0 1px 1.5px rgba(48,45,40, .3));
+}
+
+/* 标针位置是每帧更新的；给位移一个很短的过渡（80ms）让转动时跟随更顺。
+   不要再加长：超过 150ms 会明显"拖尾"。
+   .is-placed 是**第二次**落位之后才由 JS 加上的类，避免首帧从容器左上角飞过来。 */
+.k3d-label.is-placed {
+  transition: transform .08s linear, opacity .18s linear;
+}
+
+/* 标针出现时的小动效（reduced-motion 下由全局禁用） */
+@media (prefers-reduced-motion: no-preference) {
+  .k3d-label.is-on .k3d-pin { animation: k3d-label-in .26s ease-out both; }
+}
+@keyframes k3d-label-in {
+  from { transform: scale(.55); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ------------------------------------------------------- 操作提示（左下） */
+.k3d-hint {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 11px;
+  border: 1px solid rgba(48, 45, 40, .12);
+  border-radius: 999px;
+  background: rgba(241,235,221, .82);
+  color: var(--ink-3, #79705f);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------- 片区外联入口（左上，独立元素） */
+/* 它不是街区里的一栋楼：做成一枚贴边的小标牌，带方向箭头与虚线基座 */
+.k3d-external {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px 8px 9px;
+  border: 1px dashed rgba(48, 45, 40, .34);
+  border-radius: 3px;
+  background: rgba(241,235,221, .9);
+  box-shadow: 0 2px 8px rgba(48,45,40, .07);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.k3d-external-icon {
+  position: relative;
+  width: 30px;
+  height: 26px;
+  flex: 0 0 30px;
+  border-radius: 2px;
+  background: var(--indigo, #2f6b7d);
+}
+/* 纯 CSS 画出"厂房 + 烟囱"的剪影 */
+.k3d-external-icon::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: 5px;
+  width: 22px;
+  height: 11px;
+  background: var(--paper, #F1EBDD);
+  clip-path: polygon(0 100%, 0 38%, 26% 66%, 26% 38%, 56% 66%, 56% 0, 78% 0, 78% 100%);
+}
+.k3d-external-icon::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid var(--ochre, #b0863b);
+  border-right: 2px solid var(--ochre, #b0863b);
+  transform: rotate(45deg);
+}
+
+.k3d-external-body { display: flex; flex-direction: column; line-height: 1.25; }
+.k3d-external-body b {
+  font-family: var(--serif, "Songti SC", "STSong", serif);
+  font-size: 13.5px;
+  letter-spacing: .04em;
+  color: var(--ink, #302D28);
+}
+.k3d-external-body i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-3, #79705f);
+}
+
+/* 指向街区方向的箭头：交代"这个是往外走的"，与街区内的地标标签区分开 */
+.k3d-external-arrow {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  margin-left: 2px;
+  border-top: 1.5px solid var(--red, #B84A3A);
+  border-right: 1.5px solid var(--red, #B84A3A);
+  transform: rotate(45deg);   /* 指向右下：由左上角的外联入口指回片区 */
+  opacity: .8;
+}
+
+/* ------------------------------------------------------------------ 小屏适配
+   标针只有 26×34，手机上不再需要"只留三地标"——11 根针也压不到一起，
+   所以这里只把针缩小一档（22×29），仍然全部显示。 */
+@media (max-width: 720px) {
+  .k3d-label { width: 19px; height: 31px; }
+  .k3d-label .k3d-pin-num { font-size: 9.5px; }
+  .k3d-label::after { width: 5px; height: 2px; margin-left: -2.5px; }
+  .k3d-hint { display: none; }
+  .k3d-external { padding: 6px 10px 6px 7px; gap: 7px; }
+  .k3d-external-icon { width: 24px; height: 21px; flex-basis: 24px; }
+  .k3d-external-icon::before { width: 17px; height: 9px; left: 3px; }
+  .k3d-external-body b { font-size: 12px; }
+  .k3d-external-body i { font-size: 10px; }
+}
+
+/* 尊重系统的"减少动态效果"：关掉标针动效，避免前庭不适 */
+@media (prefers-reduced-motion: reduce) {
+  .k3d-label, .k3d-label .k3d-pin { transition: none; }
+  .k3d-label.is-on .k3d-pin { animation: none; }
+}

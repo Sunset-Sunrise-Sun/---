@@ -1,0 +1,70 @@
+/* ============================================================
+   分级标题与图片带
+   —— 原用华文行楷做艺术字，实测观感不佳（且封面背景照片里本就有「康鹭」二字，
+      再叠书法字是重复），已改回站点原有的衬线字；只保留"大标题明显大"的字号层级。
+   ============================================================ */
+:root{
+  /* 分级字号：大标题必须明显大，层级一眼可辨
+     —— 2026-09 用户反馈「全站字号偏小」后整体上调约 8–12%，
+        正文基准见 style.css 的 body（16.5px），此处只负责「大字」这一端：
+        hero > h1 > h2 > h3 > lede，落差不变，避免放大后层级被拉平。 */
+  --fs-hero:  clamp(68px, 9.6vw, 156px);   /* 网页大标题 */
+  --fs-h1:    clamp(46px, 5.4vw, 84px);
+  --fs-h2:    clamp(38px, 3.7vw, 60px);
+  --fs-h3:    clamp(25px, 2.4vw, 34px);
+  --fs-lede:  clamp(21px, 1.7vw, 23px);
+}
+
+/* 章标题：编号用等宽（砖红），中文名用衬线并明显放大 */
+.chapter-mark{ align-items:baseline; gap:13px; }
+.chapter-mark .cm-num{
+  font-family:var(--mono); font-size:24px; letter-spacing:.12em; color:var(--red);
+  margin:0; font-weight:600;
+}
+.chapter-mark .cm-txt{
+  font-family:var(--serif); font-size:clamp(38px,4.1vw,58px); line-height:1.12;
+  color:var(--ink); font-weight:600; letter-spacing:.01em;
+}
+.chapter-mark .cm-en{
+  display:block; font-family:var(--mono); font-size:15px; letter-spacing:.16em;
+  color:var(--ink-3); margin-top:9px; text-transform:uppercase; font-weight:400;
+}
+/* 兼容旧写法（<b>02</b> 纯文本）
+   注：编号是「章号」不是正文，等宽体在小字号下更吃亏，这里单独放大到 15px 并加粗一档 */
+.chapter-mark b{
+  font-family:var(--mono); font-size:24px; letter-spacing:.1em; color:var(--red);
+  font-weight:600; margin-right:5px;
+}
+
+/* 图片带：三张现场小图。
+   —— 用户反馈「等分网格像表格、好丑」，改为不等分的杂志式错落：
+      左图跨两行且更高（主），右上与右下各一张（次），三张大小不一。 */
+.photo-strip{
+  display:grid; gap:10px; margin:30px 0 0;
+  grid-template-columns:.58fr .42fr;
+  grid-template-rows:auto auto;
+}
+.photo-strip figure{ margin:0; }
+.photo-strip figure:first-child{ grid-row:span 2; }
+.photo-strip img{ width:100%; height:100%; object-fit:cover; object-position:center 42%;
+  border-radius:var(--radius); }
+.photo-strip figure:first-child img{ aspect-ratio:3/4; }
+.photo-strip figure:not(:first-child) img{ aspect-ratio:16/10; }
+.photo-strip figcaption{ font-size:14px; line-height:1.7; color:var(--ink-3); margin-top:7px; }
+@media (max-width:760px){
+  .photo-strip{ grid-template-columns:1fr; }
+  .photo-strip figure:first-child{ grid-row:auto; }
+  .photo-strip figure:first-child img,
+  .photo-strip figure:not(:first-child) img{ aspect-ratio:4/3; }
+}
+
+/* 封面入口：点击走进康鹭 */
+.cover-enter{
+  display:inline-flex; align-items:center; gap:12px; margin-top:26px;
+  padding:15px 30px; border:1.5px solid rgba(241,235,221,.75); border-radius:999px;
+  color:var(--paper); text-decoration:none; font-size:16px; letter-spacing:.06em;
+  background:rgba(241,235,221,.08); backdrop-filter:blur(4px); transition:.24s;
+}
+.cover-enter:hover{ background:rgba(241,235,221,.2); border-color:var(--paper); }
+.cover-enter i{ width:9px; height:9px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform:rotate(45deg) translateY(-2px); }

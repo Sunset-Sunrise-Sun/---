@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>康鹭地图 · 康鹭记忆</title>
+<meta name="description" content="广州康鹭片区意象地图：产业空间、生活服务、治理节点、交通连接与区域外联五个图层，点击节点查看田野记录。">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/scene3d.css">
+<link rel="stylesheet" href="assets/css/scene-host.css">
+<!-- share-card -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="康鹭记忆">
+  <meta property="og:title" content="康鹭地图 · 康鹭记忆">
+  <meta property="og:description" content="一张关系地图：把供应、用工、出货、治理四张网络折叠在同一平方公里之内，标注 15 处空间节点。">
+  <meta property="og:image" content="https://sunset-sunrise-sun.github.io/---/kanglu-dh/assets/img/share-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://sunset-sunrise-sun.github.io/---/kanglu-dh/map.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="康鹭地图 · 康鹭记忆">
+  <meta name="twitter:description" content="一张关系地图：把供应、用工、出货、治理四张网络折叠在同一平方公里之内，标注 15 处空间节点。">
+  <meta name="twitter:image" content="https://sunset-sunrise-sun.github.io/---/kanglu-dh/assets/img/share-card.jpg">
+  <link rel="icon" href="assets/img/icon-180.png">
+  <link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="stylesheet" href="assets/css/brush.css">
+</head>
+<body data-page="map">
+
+<header class="site-head">
+  <div class="head-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><span>康</span></span>
+      <span class="brand-txt"><b>康鹭记忆</b><i>KANGLU MEMORY</i></span>
+    </a>
+    <button class="nav-toggle" aria-label="菜单"><i></i></button>
+    <nav class="nav">
+      <a href="index.html" data-nav="home">走进康鹭</a>
+      <a href="map.html" data-nav="map">三维街区</a>
+      <a href="people.html" data-nav="people">人物档案</a>
+      <a href="background.html" data-nav="background">产业背景</a>
+      <a href="chronicle.html" data-nav="chronicle">变迁记录</a>
+      <a href="statement.html" data-nav="statement">关于研究</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== 页首题头带：图片从页面顶端开始，页标题落在纸色区 ===== -->
+<section class="has-band" style="padding-bottom:0">
+  <div class="band band--hero">
+    <img class="band-img" src="assets/img/field/band-map.jpg"
+         srcset="assets/img/field/band-map-960.jpg 960w, assets/img/field/band-map.jpg 2560w"
+         sizes="100vw" width="2560" height="711" decoding="async"
+         alt="暮色中的康乐东约牌坊，前景是虚化的车流与绿篱，右侧有公交车驶过">
+    <div class="band-veil" aria-hidden="true"></div>
+    <div class="band-cap">
+      <div class="wrap">
+        <p class="crumb"><a href="index.html">首页</a> / 康鹭地图</p>
+        <h1 class="band-title">康鹭地图</h1>
+        <p class="band-sub">这是一处<b>可以走进去的街区</b>：拖动旋转、滚轮缩放，点击地标查看该处的田野记录。<b>它是示意性重建</b>，依据公开地图与现场照片确定地标与街巷的相对关系，不是测绘成果，也不代表真实尺寸与位置。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="map-layout">
+      <!-- 地图 -->
+      <div>
+        <div class="map-tools">
+          <div id="mapFilters" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          <span class="map-note">3D BLOCK MODEL · 示意性重建，非测绘成果</span>
+        </div>
+
+        <!-- 三维街区取代了原来的二维意象图；地点卡片就弹在地标旁边的对应位置 -->
+        <div class="map-stage" id="mapStage3d">
+          <div id="kanglu3d" class="k3d-3dhost"
+               aria-label="康鹭片区三维街区：拖动旋转、滚轮缩放、点击地标查看记录"></div>
+          <div class="k3d-tip">拖动旋转 · 滚轮缩放 · 点击地标查看记录</div>
+          <div class="place-pop" id="placePop" hidden></div>
+        </div>
+
+        <div class="legend">
+          <span><i style="background:#B84A3A"></i>产业空间</span>
+          <span><i style="background:#4a7a5c"></i>生活服务</span>
+          <span><i style="background:#2f6b7d"></i>治理节点</span>
+          <span><i style="background:#b0863b"></i>交通连接</span>
+          <span><i style="background:#7a4a6b"></i>区域外联</span>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em">
+            共 15 处节点 · 5 个图层 · 11 处已建三维地标
+          </span>
+        </div>
+
+        <!-- 地标图例：场内只放小圆标（01–11），名称与副标题都收在这里。
+             条目由 map3d.js 用 api.getPlaces() 生成，编号与场内圆标一一对应。
+             放在三维场景下方、三栏卡片上方 —— 不占画面、也不挡地图。 -->
+        <div class="place-legend" id="placeLegend">
+          <div class="pl-head">
+            <span class="pl-title">地标图例</span>
+            <span class="pl-hint">点条目 → 镜头推近该地点；把鼠标移到场内圆标上 → 这里的对应条目会亮起来</span>
+          </div>
+          <ol class="pl-grid" id="placeLegendList"></ol>
+          <div class="pl-others">
+            <span class="pl-others-title" id="placeLegendOtherTitle">其他节点（未编号）</span>
+            <div class="pl-others-list" id="placeLegendOther"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 详情面板 -->
+      <aside>
+        <!-- 左栏：平面关系图（老站点的二维意象图搬回来）。
+             原来这里是 #panelBody（地点档案面板），只有点过地标才有内容，
+             初始状态是个空壳 —— 现在换成这张"平面版关系图"与上面的三维对照看。 -->
+        <div class="card">
+          <h4 style="font-size:15px">关系图（平面版）</h4>
+          <div class="map2d-host">
+            <svg id="kangluMap2d" viewBox="0 0 1000 680" preserveAspectRatio="xMidYMid meet"
+                 role="img" aria-label="康鹭片区平面关系示意图：新港西路、瑞康路、逸景路、河涌、村域范围与 15 处节点"></svg>
+          </div>
+          <p class="map2d-note">
+            这是平面关系图：只表达各节点的相对方位，以及供应 / 用工 / 出货 / 转移这几组关系，不是测绘成果——
+            与上面的三维街区对照看。带细圈的是已建三维形体的地点，点一下可以把三维镜头推过去。
+          </p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h4 style="font-size:15px">空间关系速览</h4>
+          <div id="relList" style="display:flex;flex-direction:column;gap:14px;margin-top:12px"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h4 style="font-size:15px">节点索引</h4>
+          <div id="poiList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 规划图对照 ===== -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Plan Reference</p>
+      <h2 class="h-sec">规划图对照</h2>
+      <p class="lead">
+        上面的意象图是课题组绘制的，用来表达空间关系；下面这张是公开的规划图件，
+        用来核对方位与用地性质。两者并列，是为了让「大致在哪」这件事有据可查。
+      </p>
+    </div>
+
+    <figure class="panel reveal">
+      <span class="panel-tag">图件 · Document</span>
+      <img src="assets/img/boards/map-regulatory.jpg"
+           srcset="assets/img/boards/map-regulatory-thumb.jpg 560w, assets/img/boards/map-regulatory.jpg 1197w"
+           sizes="(max-width:760px) 100vw, 1100px" width="1197" height="827"
+           loading="lazy" decoding="async"
+           alt="原控规用地布局图：红色虚线为更新单元范围与改造范围，片区四周为新港西路、广州大道南、瑞康路与逸景路">
+      <figcaption>
+        <b>原控规用地布局图。</b>红色虚线为更新单元范围与改造范围（110.27 公顷）。
+        片区由新港西路（北）、广州大道南（东）、瑞康路（西）、逸景路（南）围合，
+        内部以居住用地与商业商务用地为主；图中北侧紧邻的即是中大布匹市场所在的中大纺织商圈。
+        意象图中的节点方位按这套边界摆放，但<b>不按比例、不具测绘精度</b>。
+        <span class="src">图件转载自公开渠道，版权归原公布单位</span>
+      </figcaption>
+    </figure>
+
+    <div class="panel-row reveal" style="margin-top:22px">
+      <figure class="panel">
+        <span class="panel-tag">图件 · Document</span>
+        <img src="assets/img/boards/board-market-map.jpg"
+             srcset="assets/img/boards/board-market-map-thumb.jpg 560w, assets/img/boards/board-market-map.jpg 1600w"
+             sizes="(max-width:760px) 100vw, 560px" width="1600" height="1200"
+             loading="lazy" decoding="async"
+             alt="中大纺织商圈市场分布图与海珠区纺织零工市场宣传板">
+        <figcaption>
+          <b>中大纺织商圈市场分布图。</b>板上把商圈内的各个专业市场与康鹭片区的位置关系画了出来，
+          可以看清「市场包围村庄」这句话在空间上是什么样子。
+          <span class="src">课题组田野拍摄，2026 年 8 月</span>
+        </figcaption>
+      </figure>
+      <figure class="panel">
+        <span class="panel-tag">图件 · Document</span>
+        <img src="assets/img/field/board-hiring-led.jpg"
+             srcset="assets/img/field/board-hiring-led-thumb.jpg 560w, assets/img/field/board-hiring-led.jpg 1474w"
+             sizes="(max-width:760px) 100vw, 560px" width="1474" height="897"
+             loading="lazy" decoding="async"
+             alt="海珠区纺织零工市场招工信息发布屏">
+        <figcaption>
+          <b>招工广场的信息发布屏。</b>招工广场是这张地图上人气最集中的节点（原鹭江球场，
+          约 4875 平方米，2023 年改造）。屏上的工种与工价，是「产业空间」这一图层最直接的注脚。
+          <span class="src">课题组田野拍摄，2026 年 8 月</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 空间读法 -->
+<section style="background:var(--paper-2);border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Reading the Space</p>
+      <h2 class="h-sec">三种读图方式</h2>
+    </div>
+    <div class="three-col">
+      <div class="card reveal">
+        <h4>① 竖着读：楼层分工</h4>
+        <p>一栋握手楼里，往往一楼是档口或辅料店，中间楼层是作坊，顶层是加盖的铁皮房——
+           也是面积最大、租金最低、最容易被认定为违建的部分。产业在垂直方向上完成了自我堆叠。</p>
+      </div>
+      <div class="card reveal">
+        <h4>② 横着读：十分钟半径</h4>
+        <p>从中大布匹市场选料，到村内加工，再到凌晨发往十三行——全部发生在步行十分钟与车程半小时的半径内。
+           「去哪里都快」是康鹭速度的物理前提。</p>
+      </div>
+      <div class="card reveal">
+        <h4>③ 往外读：80 公里</h4>
+        <p>广清产业园在 80 公里之外。这个距离意味着「当天接单、当天出货」不再成立，
+           也意味着印花、烫钻、洗水这些「就在楼下」的配套工序需要重新组织。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div>
+      <h5>关于本站</h5>
+      <p>康鹭记忆是一项数字人文教学研究项目，以广州海珠康乐村、鹭江村的制衣产业为对象，尝试用结构化数据、空间标注与人物档案的方式，保存一场正在发生的城市变迁。</p>
+    </div>
+    <div>
+      <h5>站点地图</h5>
+      <ul>
+        <li><a href="index.html">首页</a></li>
+        <li><a href="background.html">背景资料</a></li>
+        <li><a href="map.html">康鹭地图</a></li>
+        <li><a href="people.html">人物档案</a></li>
+        <li><a href="statement.html">声明与方法</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>引用与声明</h5>
+      <p>本图为课题组绘制的意象示意图，用于表达空间关系，不具备测绘精度，不可用于地籍、规划等实务用途。</p>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span>© 2026 康鹭记忆 · Kanglu Memory Digital Humanities Project</span>
+    <span>数据整理自公开新闻报道与政府公开文件</span>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/people-data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/scene-bundle.js"></script>
+<script src="assets/js/map3d.js"></script>
+<script src="assets/js/ai.js"></script>
+<script>initReveal();</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+/* ============================================================
+   首页「章」结构（参考 bjjy.cn/bngj 的做法：章号 + 短文字 + 大幅图入口）
+   —— 首页不承载深度内容，深度全在子页
+   ============================================================ */
+.chapter{ padding:0; position:relative; }
+.chapter + .chapter{ border-top:1px solid var(--line-soft); }
+/* 章内容列：文字与图片（.figure-block）**共用同一个盒**，
+   所以左右边界天然重合、两侧留白严格等宽。
+   想要更宽的呼吸感时，只调这里的 --col-pad —— 文字和图一起内缩，
+   绝不能只把图片单独往里缩（那会让图片左边缘与正文错开，是做错过的写法）。
+   手机端 --col-pad 收到 0，避免把图压小。 */
+.chapter-inner{
+  --col-pad: clamp(0px, 2vw, 28px);
+  width:min(100% - 48px, 1220px); margin-inline:auto;
+  padding:clamp(44px,6vw,84px) var(--col-pad);
+}
+.chapter-mark{
+  display:flex; align-items:baseline; gap:17px; margin-bottom:17px;
+  font-family:var(--mono); font-size:16px; letter-spacing:.16em; color:var(--red);
+}
+/* 章号：与 brush.css 的 .chapter-mark b 一致，这里是 <b>02</b> 的兜底写法 */
+.chapter-mark b{ font-family:var(--mono); font-size:24px; letter-spacing:.1em; color:var(--red); font-weight:600; }
+.chapter-lede{ max-width:54ch; font-size:clamp(21px,1.7vw,23px); line-height:1.85; color:var(--ink-2); margin:0 0 32px; }
+
+/* 大幅图入口：整块可点 */
+.plate{
+  display:block; position:relative; overflow:hidden; border-radius:var(--radius);
+  text-decoration:none; color:var(--paper); background:var(--paper-2);
+}
+.plate img{ width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .6s cubic-bezier(.2,.7,.3,1), filter .4s ease; }
+.plate:hover img{ transform:scale(1.02); }
+.plate .plate-cap{
+  position:absolute; left:0; right:0; bottom:0; padding:28px clamp(18px,2.4vw,32px) 24px;
+  background:linear-gradient(180deg, rgba(48,45,40,0) 0%, rgba(48,45,40,.62) 62%, rgba(48,45,40,.82) 100%);
+}
+.plate .plate-cap i{ font-family:var(--mono); font-size:14.5px; letter-spacing:.14em; font-style:normal; opacity:.85; }
+.plate .plate-cap b{ display:block; font-family:var(--serif); font-size:clamp(28px,3vw,40px); margin:8px 0 7px; }
+.plate .plate-cap span{ font-size:18px; line-height:1.8; opacity:.92; }
+.plate.map-plate{ height:clamp(340px,52vh,560px); }
+.plate.map-plate .plate-cap{ max-width:62%; }
+@media (max-width:760px){ .plate.map-plate .plate-cap{ max-width:100%; } }
+
+/* 小图入口组 */
+.plate-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+.plate-row .plate{ height:clamp(200px,26vh,280px); }
+.plate-row .plate .plate-cap b{ font-size:clamp(23px,2.2vw,29px); }
+
+/* 代表数字：一句话，不做大表格
+   —— 首页已改回「六宫格 + 占比条」（见 style.css 的 .stats / .bars），
+      这条一行式仍保留给其它页面使用，字号同步上调以免与小字混排时割裂。 */
+.figure-line{ display:flex; flex-wrap:wrap; gap:11px 28px; margin:0 0 24px; padding:0; list-style:none; }
+.figure-line li{ font-size:19px; color:var(--ink-2); }
+.figure-line b{ font-family:var(--serif); font-size:28px; color:var(--red); margin-right:4px; }
+
+/* 章内右对齐的次级入口 */
+.chapter-more{ margin-top:22px; font-size:19px; }

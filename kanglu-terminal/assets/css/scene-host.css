@@ -1,0 +1,125 @@
+/* 三维地图试验：舞台与地点卡片（配合上一版的 style.css 使用） */
+.map-stage{ position:relative; }
+.k3d-3dhost{ width:100%; height:clamp(420px, 62vh, 620px); position:relative;
+  border-radius:var(--radius); overflow:hidden; background:var(--paper-2); }
+.k3d-3dhost.ready{ box-shadow:inset 0 0 0 1px var(--line); }
+.k3d-tip{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  font-size:12px; color:var(--ink-3); background:rgba(241,235,221,.86);
+  border:1px solid var(--line-soft); border-radius:999px; padding:5px 12px; pointer-events:none; }
+
+/* ------------------------------------------------------------ 平面关系图（左栏）
+   老站点那张二维意象图搬回来当"平面版对照"。SVG 用 viewBox 自适应，
+   宽度 100%、高度按比例 —— 不要写死 1000×680 像素。 */
+.map2d-host{ margin-top:12px; border:1px solid var(--line); border-radius:var(--radius);
+  overflow:hidden; background:var(--paper); }
+.map2d-host svg{ display:block; width:100%; height:auto; }
+.map2d-note{ margin:10px 0 0; font-size:12px; line-height:1.75; color:var(--ink-3); }
+/* 平面图上的节点可点（点一下 → 推三维镜头 + 弹地点卡片） */
+.map2d-host .mp-poi:focus{ outline:none; }
+.map2d-host .mp-poi:focus-visible circle.dot{ stroke-width:4; }
+
+/* 节点索引里"没有三维形体"的节点（区域外联 / 交通 / 未重建的工业区）：
+   给一个淡底 + 右上箭头，鼠标悬停有说明，避免点了像"没反应" */
+.chip.is-external{ opacity:.8; border-style:dashed; }
+.chip.is-external::after{ content:'↗'; margin-left:5px; font-size:10px; color:var(--ink-3); }
+
+/* ------------------------------------------------------------ 地标图例（场景下方）
+   场内只有小圆标（01–11），名称/副标题收在这张图例里。
+   一行 2–3 个（auto-fill + minmax），窄屏自动降到 1 列。 */
+.place-legend{ margin-top:14px; border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--paper); padding:14px 16px 12px; }
+
+.pl-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px; margin-bottom:10px; }
+.pl-title{ font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--ink-2); text-transform:uppercase; }
+.pl-hint{ font-size:12px; color:var(--ink-3); }
+
+.pl-grid{ list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:4px 12px; }
+
+.pl-item{ display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+  padding:5px 8px; border:1px solid transparent; border-radius:3px;
+  background:none; color:var(--ink); font:inherit; cursor:pointer;
+  transition:background-color .15s ease, border-color .15s ease; }
+.pl-item:hover, .pl-item:focus-visible{ background:var(--paper-2); border-color:var(--line); outline:none; }
+/* 悬停场内圆标 / 点过之后：图例里对应条目高亮 */
+.pl-item.is-hover{ background:var(--paper-2); border-color:var(--line); }
+.pl-item.is-active{ background:#FBF6EC; border-color:rgba(184,74,58,.35); }
+
+.pl-num{ flex:0 0 24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  border:1.4px solid var(--ink); background:rgba(241,235,221,.94); color:var(--ink);
+  font-family:var(--mono); font-size:10.5px; font-weight:600; }
+/* 核心三处：砖红实底（与场内圆标一致） */
+.pl-num.is-primary{ background:var(--red, #B84A3A); border-color:var(--red, #B84A3A); color:#F7F1E4; }
+
+.pl-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.pl-text b{ font-size:13.5px; font-weight:600; }
+.pl-item.is-active .pl-text b{ color:var(--red, #B84A3A); }
+.pl-text i{ font-style:normal; font-size:11px; color:var(--ink-3); }
+
+.pl-others{ margin-top:12px; padding-top:10px; border-top:1px dashed var(--line); }
+.pl-others-title{ font-size:11.5px; color:var(--ink-3); letter-spacing:.04em; }
+.pl-others-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+.pl-other{ display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border:1px dashed var(--line); border-radius:999px;
+  background:var(--paper-2); color:var(--ink-2); font:inherit; font-size:12px; cursor:pointer; }
+.pl-other:hover, .pl-other:focus-visible{ border-color:rgba(184,74,58,.4); color:var(--red, #B84A3A); outline:none; }
+.pl-other.is-active{ border-style:solid; border-color:rgba(184,74,58,.45); color:var(--red, #B84A3A); }
+.pl-other em{ font-style:normal; font-size:10px; color:var(--ink-3); }
+.pl-other.is-hidden3d::before{ content:'医'; font-family:var(--mono); font-size:9.5px;
+  border:1px solid var(--ink-3); border-radius:50%; width:15px; height:15px;
+  display:inline-flex; align-items:center; justify-content:center; color:var(--ink-3); }
+
+@media (max-width: 760px){
+  .pl-grid{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); }
+  .pl-text b{ font-size:12.5px; }
+  .pl-text i{ font-size:10.5px; }
+  .pl-hint{ display:none; }
+}
+
+/* 地点卡片：贴着对应地标弹出 */
+.place-pop{ position:absolute; z-index:20; width:min(320px, 88%);
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow-lg, 0 10px 30px rgba(48,45,40,.18)); padding:16px 16px 14px; }
+.place-pop.open{ display:block; }
+.place-pop .pp-close{ position:absolute; top:8px; right:10px; width:26px; height:26px;
+  border:1px solid var(--line); border-radius:50%; background:var(--paper);
+  color:var(--ink-2); font-size:15px; line-height:1; cursor:pointer; }
+.place-pop .pp-eyebrow{ font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+  color:var(--red); text-transform:uppercase; margin:0 0 6px; }
+.place-pop h3{ font-size:20px; margin:0 0 10px; }
+.place-pop figure{ margin:0 0 10px; }
+.place-pop figure img{ width:100%; aspect-ratio:4/3; object-fit:cover;
+  object-position:center 45%; border-radius:var(--radius); }
+.place-pop figcaption{ font-size:11.5px; line-height:1.65; color:var(--ink-3); margin-top:5px; }
+.place-pop .pp-line{ font-size:13.5px; line-height:1.85; color:var(--ink-2); margin:0 0 10px; }
+.place-pop blockquote{ font-family:var(--serif); font-size:14.5px; line-height:1.75;
+  border-left:2px solid var(--red); padding-left:10px; margin:0 0 10px; }
+.place-pop blockquote cite{ display:block; font:400 11.5px/1.5 var(--sans);
+  color:var(--ink-3); font-style:normal; margin-top:5px; }
+.place-pop .pp-links{ margin:0; font-size:12.5px; display:flex; gap:12px; flex-wrap:wrap; }
+.place-pop .pp-links a{ color:var(--red); text-decoration:none; border-bottom:1px solid rgba(184,74,58,.3); }
+@media (max-width:760px){
+  .k3d-3dhost{ height:52vh; min-height:320px; }
+  .place-pop{ position:static; width:auto; margin-top:12px; }
+}
+
+/* ============================================================
+   通栏改造（关键）
+   ------------------------------------------------------------
+   原来地图页是「左场景 760px + 右侧栏 340px」，场景宽高比只有 1.35:1。
+   同一套相机参数在窄高容器里，垂直视野会多出一大片空地面——楼群只占下缘一条。
+   导出首页大图时用的是 2560×900（2.84:1），同一场景却铺得很满，就是这个原因。
+   所以改成通栏：场景占满整屏宽（约 1400×620 ≈ 2.26:1），
+   侧栏那三块（地点面板 / 空间关系 / 节点索引）移到场景下方横排。
+   ============================================================ */
+.map-layout{ grid-template-columns:1fr; }
+.map-layout > aside{
+  display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:clamp(14px,2vw,24px); margin-top:clamp(18px,2.4vw,28px); align-items:start;
+}
+.map-layout > aside > .card{ margin-top:0 !important; }
+.k3d-3dhost{ height:clamp(420px, 60vh, 620px); }
+@media (max-width:960px){
+  .map-layout > aside{ grid-template-columns:1fr; }
+}
