@@ -917,20 +917,41 @@ section.has-band{ padding-top:0; }
 .band-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .band-veil{
   position:absolute; inset:0;
-  /* 上端用约 22% 的高度缓慢淡入（太短会像"顶格"贴上去），
-     中段只留 13% 压层让照片真正露出来，下端再用约 44% 的高度过渡到纸色，
-     保证标题始终落在纯纸色区 */
+  /* 上端用约 22% 的高度缓慢淡入（太短会像"顶格"贴上去），中段只留 13% 压层让照片真正露出来，
+     下端过渡到纸色，保证标题与正文落在接近纯纸色的区域。
+     ⚠️ 2026-09 用户反馈「文字和背景没有区分开、照片那道明暗分界线横切文字」：
+        原因是原来 52%→72% 这一段从 .14 冲到 .62（每 10% 涨 24 个点），
+        照片里本来就有硬边（近处树篱与远处街道），被半透明纸色一压就成了一条灰带。
+        现在改为**把过渡拉长、每步落差压到 ≤10 个点**：
+        46% 起就稳步加纸色，到 88% 已经接近纯纸——文字底下不再有可见的明暗分界。 */
   background:linear-gradient(180deg,
     var(--paper) 0%,
     rgba(241,235,221,.88) 4%,
-    rgba(241,235,221,.58) 11%,
-    rgba(241,235,221,.28) 22%,
-    rgba(241,235,221,.13) 40%,
-    rgba(241,235,221,.14) 52%,
-    rgba(241,235,221,.62) 72%,
+    rgba(241,235,221,.56) 14%,
+    rgba(241,235,221,.26) 30%,
+    rgba(241,235,221,.16) 44%,
+    rgba(241,235,221,.20) 54%,
+    rgba(241,235,221,.34) 64%,
+    rgba(241,235,221,.52) 74%,
+    rgba(241,235,221,.72) 82%,
+    rgba(241,235,221,.90) 90%,
     var(--paper) 96%);
 }
-.band-cap{ position:relative; z-index:2; width:100%; padding-bottom:22px; }
+/* 标题/正文所在的那一块给一层**接近实底的纸色**，并向上渐隐到照片。
+   为什么不能只靠 .band-veil：带底往往是画面的主体（牌坊、公交、树篱），
+   半透明纸色压不住它，深墨色正文会与照片纹理糊在一起（用户反馈过）。
+   经验值：标题顶边大约在 .band-cap 高度的一半处，正文在中下部，
+   所以**纸色必须在 50% 之前就压到接近 1**；只做到 .62 是不够的（试过，正文仍然糊）。 */
+.band-cap{
+  position:relative; z-index:2; width:100%; padding-bottom:22px;
+  background:linear-gradient(180deg,
+    rgba(241,235,221,0) 0%,
+    rgba(241,235,221,.22) 12%,
+    rgba(241,235,221,.62) 26%,
+    rgba(241,235,221,.92) 38%,
+    rgba(241,235,221,.98) 48%,
+    rgba(241,235,221,1) 100%);
+}
 .band-kicker{
   display:flex; align-items:center; gap:10px; margin:0 0 10px;
   font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--red);
