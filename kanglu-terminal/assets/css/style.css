@@ -112,17 +112,24 @@ section.tight{ padding:56px 0; }
   height:66px; display:flex; align-items:center; gap:26px;
 }
 .brand{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+/* 品牌标记：原来是「墨色圆圈 + 朱红虚线内圈 + 康字」。
+   换成小白鹭之后，34px 里塞两个圆圈再放一只鸟太挤（实测放大 4 倍是一团），
+   所以两个圈都撤掉，让白鹭独占整个 34px —— 与标签页 favicon 同样的取舍。
+   外圈撤掉后封面上的白色顶栏（.head-clear）也不需要再改圈的颜色了。 */
 .brand-mark{
   width:34px; height:34px; flex-shrink:0;
-  border:1.5px solid var(--ink); border-radius:50%;
   display:grid; place-items:center; position:relative;
-  background:var(--paper);
+  background:transparent;
 }
-.brand-mark::before{
-  content:""; position:absolute; inset:5px; border-radius:50%;
-  border:1px dashed var(--red);
-}
+.brand-mark::before{ content:none; }
 .brand-mark span{ font-family:var(--serif); font-size:15px; font-weight:700; color:var(--red); }
+/* 页头品牌标记里的小白鹭。
+   与右下角的小白鹭、与标签页 favicon 同一套形体（纸白身 + 墨色勾线 + 朱红喙脚）。
+   勾线用 currentColor，所以白色顶栏（.head-clear）里它会整体转白、身底换成半透明白。 */
+.brand-bird{ width:32px; height:30px; display:block; color:var(--ink); }
+.site-head.head-clear .brand-bird{ color:#fff; }
+.site-head.head-clear .brand-bird ellipse,
+.site-head.head-clear .brand-bird circle{ fill:rgba(255,255,255,.94); }
 .brand-txt b{ display:block; font-family:var(--serif); font-size:21.5px; letter-spacing:.06em; line-height:1.2; }
 .brand-txt i{ display:block; font-style:normal; font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--ink-3); }
 
