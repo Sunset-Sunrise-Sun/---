@@ -214,7 +214,11 @@ function initCover(){
 function initSideNav(){
   const nav = $('.side-nav');
   if (!nav) return;
-  const links = $$('a[data-side]', nav);
+  /* 导航项从 <a> 改成 <div class="item">：因为收起时它是一条细轴，
+     展开靠 :hover 而不是靠链接本身；点击/回车仍然跳到对应小节。
+     （改成 div 的原因见 style.css 里 .side-nav 的注释：a 元素在收起宽度下
+      会被 overflow 裁成零宽，点击区域也没了。） */
+  const links = $$('[data-side]', nav);
   if (!links.length) return;
   const targets = links.map(a => document.getElementById(a.dataset.side)).filter(Boolean);
   if (!targets.length) return;
@@ -222,6 +226,14 @@ function initSideNav(){
 
   links.forEach(a => {
     if (!document.getElementById(a.dataset.side)) a.style.display = 'none';
+    const go = () => {
+      const t = document.getElementById(a.dataset.side);
+      if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+    };
+    a.addEventListener('click', go);
+    a.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
   });
 
   if ('IntersectionObserver' in window){
@@ -251,11 +263,37 @@ function initSideNav(){
   }
 }
 
+/* ---------- 小屏的小节跳转面板（右下角「带路」按钮弹出） ----------
+   大屏用左侧细轴导航（.side-nav），小屏（≤1199px）细轴隐藏，
+   改由这个面板提供同样的小节跳转。点外面或按 Esc 收起。 */
+function initNavSheet(){
+  const fab = $('#navSheetFab');
+  const sheet = $('#subnavSheet');
+  if (!fab || !sheet) return;
+
+  function setOpen(open){
+    sheet.hidden = !open;
+    fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+    fab.textContent = open ? '收起' : '带路';
+  }
+  fab.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(sheet.hidden);
+  });
+  sheet.addEventListener('click', (e) => {
+    if (e.target.closest('a')) setOpen(false);   // 点条目跳走后就收起
+    e.stopPropagation();
+  });
+  document.addEventListener('click', () => { if (!sheet.hidden) setOpen(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+}
+
 /* ---------- 启动 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initCover();
   initSideNav();
+  initNavSheet();
   initReveal();
   initCounters();
   initBars();

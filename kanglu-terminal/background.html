@@ -65,20 +65,24 @@
 <!-- 大屏：左侧竖排小节导航（竖轴 + 圆点，轴上朱红填充为阅读进度） -->
 <nav class="side-nav" aria-label="小节导航">
   <span class="track" aria-hidden="true"><i></i></span>
-  <a href="#location" data-side="location"><span>区位与概况</span></a>
-  <a href="#industry" data-side="industry"><span>产业逻辑</span></a>
-  <a href="#space" data-side="space"><span>空间形态</span></a>
-  <a href="#glossary" data-side="glossary"><span>乡土词条</span></a>
+  <div class="item" data-side="location" tabindex="0" role="link" aria-label="跳到：区位与概况"><span>区位与概况</span></div>
+  <div class="item" data-side="industry" tabindex="0" role="link" aria-label="跳到：产业逻辑"><span>产业逻辑</span></div>
+  <div class="item" data-side="space" tabindex="0" role="link" aria-label="跳到：空间形态"><span>空间形态</span></div>
+  <div class="item" data-side="glossary" tabindex="0" role="link" aria-label="跳到：乡土词条"><span>乡土词条</span></div>
 </nav>
 
-<!-- 小屏：保留横排跳转条 -->
-<div class="wrap subnav-wrap" style="margin-top:32px">
-  <nav class="subnav">
-    <a href="#location">区位与概况</a>
-    <a href="#industry">产业逻辑</a>
-    <a href="#space">空间形态</a>
-    <a href="#glossary">乡土词条</a>
-  </nav>
+<!-- 小屏（≤1199px）：横排跳转条藏进右下角的小面板，点「带路」按钮弹出 -->
+<button class="nav-sheet-fab" id="navSheetFab" type="button" aria-expanded="false" aria-controls="subnavSheet">带路</button>
+<div class="nav-sheet" id="subnavSheet" hidden>
+  <div class="nav-sheet-inner">
+    <p class="nav-sheet-title">跳到哪一节</p>
+    <nav class="subnav">
+      <a href="#location">区位与概况</a>
+      <a href="#industry">产业逻辑</a>
+      <a href="#space">空间形态</a>
+      <a href="#glossary">乡土词条</a>
+    </nav>
+  </div>
 </div>
 
 <!-- ===== 区位与概况 ===== -->
