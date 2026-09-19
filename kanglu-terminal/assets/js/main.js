@@ -72,7 +72,21 @@ function initCounters(){
 function initBars(){
   const fills = $$('.bar-fill[data-w]');
   if (!fills.length) return;
-  const set = f => { f.style.width = f.dataset.w + '%'; };
+  const set = f => {
+    f.style.width = f.dataset.w + '%';
+    /* 有区间的（如日结工 50–70%）：先让实条走到基准值 50%，
+       再在它右边跟一段斜纹条，宽度 = 区间宽度 20%，表示"上限到 70%"。
+       斜纹半透明，避免被读成一条确定的实线。 */
+    const rng = parseFloat(f.dataset.rng || '0');
+    if (rng > 0){
+      const band = document.createElement('span');
+      band.className = 'bar-range';
+      band.style.left = f.dataset.w + '%';
+      band.style.width = rng + '%';
+      band.style.background = f.style.background;
+      (f.parentElement || f).appendChild(band);
+    }
+  };
   if (!('IntersectionObserver' in window)){ fills.forEach(set); return; }
   const io = new IntersectionObserver(es => {
     es.forEach(e => {

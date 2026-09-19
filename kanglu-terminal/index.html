@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>康鹭记忆 · 广州康鹭制衣村数字人文调研</title>
 <meta name="description" content="康鹭记忆：以数字人文方法记录广州海珠康乐村、鹭江村制衣产业的空间、产业与人物档案。">
-<link rel="stylesheet" href="assets/css/style.css?v=20260919-soof">
-<link rel="stylesheet" href="assets/css/chapters.css?v=20260919-soof">
-<link rel="stylesheet" href="assets/css/brush.css?v=20260919-soof">
+<link rel="stylesheet" href="assets/css/style.css?v=20260919-1qh3">
+<link rel="stylesheet" href="assets/css/chapters.css?v=20260919-1qh3">
+<link rel="stylesheet" href="assets/css/brush.css?v=20260919-1qh3">
 <!-- share-card -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="康鹭记忆">
@@ -159,13 +159,21 @@
          每一格的数字、单位、说明都直接来自数据文件，不在 HTML 里另抄一份 -->
     <div class="stats" id="stats"></div>
 
-    <!-- 占比条：只画「有明确来源的占比」。
-         原先那张把定性描述画成比例的条形图（含「日结工占主流 70%」）因查不到来源已删除，
-         不再恢复；这里保留的一条口径见下方文案与 statement.html。 -->
+    <!-- 占比条：**只画有明确来源、且能给出范围的占比**。
+         原先那张把定性描述画成比例的条形图（含「日结工占主流 70%」、无来源）已删除，
+         后来按来源补回「日结工 50–70%」这一条（《行业研习》李婷，虎嗅 2026-03 转载）。
+         新增一条时的硬规矩：必须有可指的来源，并且把**范围**写进标签与出处行；
+         区间占比的画法见 main.js 的 renderStats/BARS 渲染与 style.css 的 .bar-fill.range。 -->
     <div class="bars-block">
-      <h3>一个可核对的占比</h3>
-      <p>片区从业者中湖北籍约占 8 成，主要来自天门、仙桃、潜江、监利、荆州。这也是「湖北村」这一别称的由来。</p>
+      <h3>三个可核对的占比</h3>
+      <p>下面三条都来自公开报道，各有自己的统计范围与年份，<b>不能互相推算</b>；给出的区间照原报道保留。</p>
       <div class="bars" id="bars"></div>
+      <p class="fig-src" style="margin:16px 0 0">
+        来源：湖北籍占比见南方都市报《康鹭「破局」》；日结工占比见《行业研习》李婷《废除劳务派遣制度？广州城中村的日结工怎么说》（2026 年 3 月，虎嗅转载），
+        该文口径为「占整个康鹭用工比例的 50%–60%，旺季突击订单时可能超过 70%」；外来人口占比按本土村民与住村人数推算，
+        正文与数字卡取保守口径「95% 以上」（推算值 99.3% 与口径差异见
+        <a class="link-arrow" href="statement.html#data">关于研究 · 统计口径</a>）。
+      </p>
     </div>
 
     <p class="tiny dim" style="max-width:66ch;margin:34px 0 0">
@@ -343,11 +351,11 @@
   </div>
 </footer>
 
-<script src="assets/js/data.js?v=20260919-soof"></script>
-<script src="assets/js/people-data.js?v=20260919-soof"></script>
-<script src="assets/js/main.js?v=20260919-soof"></script>
-<script src="assets/js/people.js?v=20260919-soof"></script>
-<script src="assets/js/ai.js?v=20260919-soof"></script>
+<script src="assets/js/data.js?v=20260919-1qh3"></script>
+<script src="assets/js/people-data.js?v=20260919-1qh3"></script>
+<script src="assets/js/main.js?v=20260919-1qh3"></script>
+<script src="assets/js/people.js?v=20260919-1qh3"></script>
+<script src="assets/js/ai.js?v=20260919-1qh3"></script>
 <script>
   document.getElementById('recPeople').textContent = PEOPLE.length;
   document.getElementById('recPoi').textContent = POIS.length;
@@ -358,17 +366,23 @@
   // 占比条：只画「有明确来源的占比」。
   // 早先那张把定性描述画成比例的条形图（含「日结工占主流 70%」等）因查不到来源已被删除，
   // 不再恢复；下面这一条的口径见本段文案与 statement.html。
+  /* 占比条数据。规则：只放**有公开来源**的占比，并把范围写进 t（标签）。
+     v 是条的基准值，range 是区间上限 —— 上限部分用斜纹半透明条表示"区间/不确定"，
+     这样区间不会被读成一条确定的实线。来源统一写在下方的出处行里。 */
   const BARS = [
-    { l:'湖北籍从业者', v:80, c:'var(--red)', t:'约 8 成',
-      s:'南方都市报《康鹭「破局」》关于康乐村、鹭江村从业者籍贯构成的报道' }
+    { l:'湖北籍从业者', v:80, c:'var(--red)', t:'约 8 成' },
+    { l:'日结工占用工比例', v:50, hi:70, c:'var(--indigo)', t:'50%–70%' },
+    { l:'外来人口占比', v:95, c:'var(--green)', t:'95% 以上' }
   ];
   document.getElementById('bars').innerHTML = BARS.map(b => `
     <div class="bar-row reveal">
       <span class="bl">${b.l}</span>
-      <span class="bar-track"><span class="bar-fill" style="background:${b.c}" data-w="${b.v}"></span></span>
+      <span class="bar-track">
+        <span class="bar-fill" style="background:${b.c}"
+              data-w="${b.v}"${b.hi ? ` data-rng="${b.hi - b.v}"` : ''}></span>
+      </span>
       <span class="bv">${b.t}</span>
-    </div>
-    <p class="fig-src" style="margin:10px 0 0">来源：${b.s}。</p>`).join('');
+    </div>`).join('');
 
   // 滚动显现 / 数字滚动 / 进度条统一由 main.js 的 DOMContentLoaded 初始化，
   // 此处只负责把数据渲染进 DOM，避免重复创建 IntersectionObserver。
