@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" role="img" aria-label="康鹭记忆">
+  <!-- 站点图标：右下角那只小白鹭的**简化随身版** —— 同一套形体
+       （纸白身 + 墨色勾线 + 朱红喙脚 + 细腿），但去掉了虚线内圈、
+       加粗了勾线、把鸟放大，好让它在 16px 的标签页里也读得出来。
+       配色沿用站点语言，和右下角的小白鹭一眼能对上。 -->
+  <circle cx="28" cy="28" r="26" fill="#F7F3E8"/>
+  <circle cx="28" cy="28" r="24.4" fill="none" stroke="#302D28" stroke-width="2.8"/>
+  <g transform="translate(-0.5, 1) scale(0.98)">
+    <!-- 腿脚：朱红细腿 + 小横脚（鸟的特征之一） -->
+    <path d="M22 37v10M31 37v10" stroke="#B84A3A" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M18.6 47h6.8M27.6 47h6.8" stroke="#B84A3A" stroke-width="2.8" stroke-linecap="round"/>
+    <!-- 身体 -->
+    <ellipse cx="26" cy="28" rx="14.5" ry="10.5" fill="#F1EBDD" stroke="#302D28" stroke-width="2.6"/>
+    <!-- 翅膀 -->
+    <path d="M19 25c5-5 12-5 16 1-4 6-12 7-16-1z" fill="#eae2d3" stroke="#302D28" stroke-width="2.2"/>
+    <!-- 头 · 冠羽 · 眼 · 朱红长喙 -->
+    <circle cx="39" cy="16" r="9.5" fill="#F1EBDD" stroke="#302D28" stroke-width="2.6"/>
+    <path d="M33 8c2-5 7-6 10-3-3 .5-5 2-6 4.5" fill="none" stroke="#302D28" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="42" cy="14" r="2" fill="#302D28"/>
+    <path d="M48 14l8 2.4-8 2.4z" fill="#B84A3A"/>
+  </g>
+</svg>
