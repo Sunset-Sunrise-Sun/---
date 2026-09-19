@@ -1,7 +1,16 @@
 /* ============================================================
    分级标题与图片带
-   —— 原用华文行楷做艺术字，实测观感不佳（且封面背景照片里本就有「康鹭」二字，
-      再叠书法字是重复），已改回站点原有的衬线字；只保留"大标题明显大"的字号层级。
+   ------------------------------------------------------------
+   历史：一度用华文行楷做艺术字，因「观感不佳 + 封面照片里本就有『康鹭』二字、
+   再叠书法字是重复」改回了衬线字。2026-09 用户再次要求「小标题换成艺术字」，
+   于是做成**默认不启用**的可选样式：
+     · 只有本机检测到行楷类字体时，才由 main.js 给 <body> 加 .brush-on，
+       标题才切成书法体 + 墨色渐变 + 朱红小印；
+     · 检测不到（iPad、多数移动端、没装 Office 的机器）就完全保持原来的衬线字，
+       不会出现"书法体缺字回落成黑体"的难看中间态。
+   ⚠️ 华文行楷/隶书/楷体都是**商业字体，不能内嵌进交付包**（体积 4–12MB 且未获授权），
+      所以这里只能用 local() 引用本机字体。要让所有人都看到，必须换成可嵌入的开源
+      字体并做子集化（见《开发与维护笔记》）。
    ============================================================ */
 :root{
   /* 分级字号：大标题必须明显大，层级一眼可辨
@@ -34,6 +43,41 @@
 .chapter-mark b{
   font-family:var(--mono); font-size:24px; letter-spacing:.1em; color:var(--red);
   font-weight:600; margin-right:5px;
+}
+
+/* ---------- 可选：小标题的艺术字处理（仅当 body.brush-on 时生效） ----------
+   由 main.js 检测到本机有行楷字体时才加 .brush-on；只改中文名这一层
+   （`.cm-txt`），英文小字与章号保持等宽体不被牵连。
+   墨色渐变让笔画有浓淡，朱红小印是图二那种版式的常见配件（纯 CSS，不引图片）。 */
+body.brush-on .chapter-mark .cm-txt{
+  font-family:"STXingkai","华文行楷","STLiti","华文隶书",STXingkai,"STKaiti","华文楷体",KaiTi,var(--serif);
+  font-weight:400;
+  font-size:clamp(44px,4.8vw,68px);
+  line-height:1.06;
+  letter-spacing:.02em;
+  background:linear-gradient(165deg,#2b2823 0%,#4a423a 52%,#221f1b 100%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+}
+body.brush-on .chapter-mark .cm-txt{ position:relative; padding-right:44px; }
+/* 朱红小印：贴在中文名右下角 */
+body.brush-on .chapter-mark .cm-txt::after{
+  content:"康鹭"; position:absolute; right:6px; bottom:2px;
+  width:32px; height:32px; border-radius:4px;
+  background:var(--red); color:#F7F1E4;
+  font-family:var(--serif); font-size:12px; line-height:1.02; font-weight:700;
+  letter-spacing:.02em; text-align:center;
+  display:grid; place-items:center;
+  -webkit-text-fill-color:#F7F1E4;
+  box-shadow:0 1px 3px rgba(48,45,40,.25);
+}
+/* 英文小字：书法体中文字面偏小，这里把英文拉开字距当作版式配件 */
+body.brush-on .chapter-mark .cm-en{
+  letter-spacing:.2em; margin-top:11px; font-size:14.5px;
+}
+@media (max-width:760px){
+  body.brush-on .chapter-mark .cm-txt{ padding-right:0; }
+  body.brush-on .chapter-mark .cm-txt::after{ display:none; }   /* 窄屏不挂印，免得挤 */
 }
 
 /* 图片带：三张现场小图。
