@@ -127,9 +127,13 @@ section.tight{ padding:56px 0; }
    与右下角的小白鹭、与标签页 favicon 同一套形体（纸白身 + 墨色勾线 + 朱红喙脚）。
    勾线用 currentColor，所以白色顶栏（.head-clear）里它会整体转白、身底换成半透明白。 */
 .brand-bird{ width:32px; height:30px; display:block; color:var(--ink); }
-.site-head.head-clear .brand-bird{ color:#fff; }
+/* 封面上的白色顶栏：背景是深色照片，这里**不能**把勾线也刷白。
+   踩过的坑：原先把 ellipse/circle 的 fill 和 stroke 都写成白色，
+   结果"白底白线"糊成一团白块（用户截图反馈）—— 鸟的轮廓全靠墨色勾线。
+   现在的做法：只把身/头的填充换成半透明白，描边（fig 里会显式写墨色）保持墨色；
+   眼睛的填充在图里就写死成墨色，不依赖 CSS。 */
 .site-head.head-clear .brand-bird ellipse,
-.site-head.head-clear .brand-bird circle{ fill:rgba(255,255,255,.94); }
+.site-head.head-clear .brand-bird circle[fill="#F1EBDD"]{ fill:rgba(255,255,255,.82); }
 .brand-txt b{ display:block; font-family:var(--serif); font-size:21.5px; letter-spacing:.06em; line-height:1.2; }
 .brand-txt i{ display:block; font-style:normal; font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--ink-3); }
 
