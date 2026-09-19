@@ -1,17 +1,22 @@
 /* ============================================================
    分级标题与图片带
    ------------------------------------------------------------
-   历史：一度用华文行楷做艺术字，因「观感不佳 + 封面照片里本就有『康鹭』二字、
-   再叠书法字是重复」改回了衬线字。2026-09 用户再次要求「小标题换成艺术字」，
-   于是做成**默认不启用**的可选样式：
-     · 只有本机检测到行楷类字体时，才由 main.js 给 <body> 加 .brush-on，
-       标题才切成书法体 + 墨色渐变 + 朱红小印；
-     · 检测不到（iPad、多数移动端、没装 Office 的机器）就完全保持原来的衬线字，
-       不会出现"书法体缺字回落成黑体"的难看中间态。
-   ⚠️ 华文行楷/隶书/楷体都是**商业字体，不能内嵌进交付包**（体积 4–12MB 且未获授权），
-      所以这里只能用 local() 引用本机字体。要让所有人都看到，必须换成可嵌入的开源
-      字体并做子集化（见《开发与维护笔记》）。
+   小标题的艺术字（2026-09 用户要求「换成图二那种毛笔字」）：
+     · 字体用 **Ma Shan Zheng（马善政毛笔楷书）**，SIL OFL 1.1 授权，
+       明确允许网页嵌入；原始字体 5.7MB，已用 pyftsubset 按**本页标题用字**
+       子集化为 assets/fonts/brush-heading.woff2（约 69KB，189 字）。
+       ⇒ 因此**所有设备都能看到**（iPad 也行），不再依赖本机装没装行楷。
+     · 只作用于小节标题（.h-sec / .h-sub / .cm-txt）与普通 h3，
+       **页首大标题（.page-banner h1 / .band-title）保持衬线**：
+       那些压在影像带上，墨色渐变在深色底上会读不清。
+     · 缺字时的回落顺序：毛笔字体 → 站点衬线，中间不插黑体，避免"一半书法一半黑体"。
    ============================================================ */
+@font-face{
+  font-family:"Kanglu Brush";
+  src:url("../fonts/brush-heading.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap;
+}
+
 :root{
   /* 分级字号：大标题必须明显大，层级一眼可辨
      —— 2026-09 用户反馈「全站字号偏小」后整体上调约 8–12%，
@@ -22,6 +27,8 @@
   --fs-h2:    clamp(38px, 3.7vw, 60px);
   --fs-h3:    clamp(25px, 2.4vw, 34px);
   --fs-lede:  clamp(21px, 1.7vw, 23px);
+  --brush:    "Kanglu Brush", var(--serif);       /* 毛笔标题字体栈 */
+  --brush-ink:linear-gradient(165deg,#2b2823 0%,#4a423a 52%,#221f1b 100%);
 }
 
 /* 章标题：编号用等宽（砖红），中文名用衬线并明显放大 */
@@ -45,39 +52,58 @@
   font-weight:600; margin-right:5px;
 }
 
-/* ---------- 可选：小标题的艺术字处理（仅当 body.brush-on 时生效） ----------
-   由 main.js 检测到本机有行楷字体时才加 .brush-on；只改中文名这一层
-   （`.cm-txt`），英文小字与章号保持等宽体不被牵连。
-   墨色渐变让笔画有浓淡，朱红小印是图二那种版式的常见配件（纯 CSS，不引图片）。 */
-body.brush-on .chapter-mark .cm-txt{
-  font-family:"STXingkai","华文行楷","STLiti","华文隶书",STXingkai,"STKaiti","华文楷体",KaiTi,var(--serif);
+/* ---------- 小标题的艺术字处理 ----------
+   只改「小节标题」这一层；页首大标题（.page-banner h1 / .band-title）不动。
+   墨色渐变让笔画有浓淡（毛笔字最怕平涂），朱红小印是图二那种版式的常见配件，纯 CSS。 */
+.h-sec, .h-sub, .cm-txt, .chapter-inner h3, .wrap > h3{
+  /* ⚠️ 必须 !important：style.css 里 .h-sub{font-family:var(--serif)} 与本选择器
+     权重相同（都是单类），而 style.css 先加载、本文件后加载——同权重下本该本文件赢，
+     但只要有人在 style.css 里把它挪到后面或写成 .h-sub 多一层，字体会被悄悄换回衬线。
+     标题字体属于"皮肤级"设置，这里直接钉死，避免以后改样式时无声失效。 */
+  font-family:var(--brush) !important;
   font-weight:400;
-  font-size:clamp(44px,4.8vw,68px);
-  line-height:1.06;
-  letter-spacing:.02em;
-  background:linear-gradient(165deg,#2b2823 0%,#4a423a 52%,#221f1b 100%);
+  letter-spacing:.03em;
+  background-image:var(--brush-ink);
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
 }
-body.brush-on .chapter-mark .cm-txt{ position:relative; padding-right:44px; }
-/* 朱红小印：贴在中文名右下角 */
-body.brush-on .chapter-mark .cm-txt::after{
-  content:"康鹭"; position:absolute; right:6px; bottom:2px;
-  width:32px; height:32px; border-radius:4px;
-  background:var(--red); color:#F7F1E4;
-  font-family:var(--serif); font-size:12px; line-height:1.02; font-weight:700;
-  letter-spacing:.02em; text-align:center;
-  display:grid; place-items:center;
-  -webkit-text-fill-color:#F7F1E4;
+/* 毛笔字形的字面比衬线小，字号略放大一档，观感才与原设计等高 */
+.h-sec{ font-size:clamp(40px,4.2vw,60px); line-height:1.16; }
+.h-sub{ font-size:clamp(27px,2.6vw,34px); line-height:1.24; }
+.chapter-inner h3, .wrap > h3{ font-size:clamp(26px,2.3vw,32px); }
+.cm-txt{ font-size:clamp(44px,4.8vw,68px); line-height:1.06; }
+
+/* 朱红小印：挂在标题行尾。
+   ⚠️ 不能挂在「渐变文字自己」身上 —— background-clip:text 会把绘制裁剪到字形里，
+      伪元素会被一起裁掉（实测过，印子完全不出现）。
+      所以外壳（h2/h3/.chapter-mark）不裁剪，只让文字自己承载渐变。 */
+.h-sec::after, .h-sub::after, .chapter-inner h3::after, .wrap > h3::after{
+  content:"康鹭";
+  display:inline-grid; place-items:center;
+  width:29px; height:29px; margin-left:14px; vertical-align:middle;
+  border-radius:4px; background:var(--red); color:#F7F1E4;
+  -webkit-text-fill-color:#F7F1E4; text-fill-color:#F7F1E4;
+  font-family:var(--serif); font-size:11.5px; line-height:1.02; font-weight:700;
+  letter-spacing:.02em;
   box-shadow:0 1px 3px rgba(48,45,40,.25);
 }
-/* 英文小字：书法体中文字面偏小，这里把英文拉开字距当作版式配件 */
-body.brush-on .chapter-mark .cm-en{
-  letter-spacing:.2em; margin-top:11px; font-size:14.5px;
+/* 章标题的印子挂在 .chapter-mark 上（.cm-txt 自己要被裁剪，不能承载伪元素） */
+.chapter-mark{ position:relative; }
+.cm-txt::after{ content:none; }
+.chapter-mark::after{
+  content:"康鹭";
+  display:inline-grid; place-items:center;
+  width:29px; height:29px; margin-left:4px; vertical-align:middle;
+  border-radius:4px; background:var(--red); color:#F7F1E4;
+  font-family:var(--serif); font-size:11.5px; line-height:1.02; font-weight:700;
+  box-shadow:0 1px 3px rgba(48,45,40,.25);
 }
+/* 英文小字与章号保持等宽体，不被牵连；标题行整体下留一点气口让印子不挤正文 */
+.chapter-mark .cm-en{ font-family:var(--mono); letter-spacing:.2em; }
 @media (max-width:760px){
-  body.brush-on .chapter-mark .cm-txt{ padding-right:0; }
-  body.brush-on .chapter-mark .cm-txt::after{ display:none; }   /* 窄屏不挂印，免得挤 */
+  /* 窄屏不挂印，免得标题行被挤到折行 */
+  .h-sec::after, .h-sub::after, .chapter-inner h3::after, .wrap > h3::after,
+  .chapter-mark::after{ display:none; }
 }
 
 /* 图片带：三张现场小图。

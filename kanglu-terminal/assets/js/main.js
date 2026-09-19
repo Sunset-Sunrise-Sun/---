@@ -302,29 +302,11 @@ function initNavSheet(){
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 }
 
-/* ---------- 可选：小标题的书法体（仅本机装了行楷时才启用） ----------
-   为什么这么绕：华文行楷等书法字体是商业字体，不能内嵌进交付包，
-   所以只能"装了就用、没装就保持原来的衬线字"。
-   直接用 CSS 字体栈会有个难看中间态：字体缺字时逐字回落到黑体，标题变成一半书法一半黑体。
-   因此这里先量一次字宽判断字体是否真的存在，存在才给 body 加 .brush-on。 */
-function initBrushTitles(){
-  try {
-    /* 探测串必须用**拉丁字符**：汉字在字体里一律占满一个字身（1em），
-       量「康鹭地图」这类文本在任何字体下都是 12×48=576px，完全区分不出字体
-       （实测踩过：八种字体全返回 576）。
-       换成拉丁串后差异明显：STXingkai 476.5 / MS YaHei 558.3 / SimSun 432。 */
-    var probe = 'KANGLU MEMORY 2026';
-    var s = document.createElement('span');
-    s.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:48px;';
-    s.textContent = probe;
-    document.body.appendChild(s);
-    function w(fam){ s.style.fontFamily = fam; return s.getBoundingClientRect().width; }
-    var base = w('"Microsoft YaHei",sans-serif');
-    var brush = w('"STXingkai","华文行楷",STXingkai,"Microsoft YaHei",sans-serif');
-    document.body.removeChild(s);
-    if (Math.abs(brush - base) > 2) document.body.classList.add('brush-on');
-  } catch (e) { /* 量不出来就保持衬线字，不影响阅读 */ }
-}
+/* 小标题的毛笔字体已改为**内嵌子集字体**（assets/fonts/brush-heading.woff2，
+   Ma Shan Zheng / SIL OFL 1.1，按标题用字子集化到约 69KB），
+   所以不再需要"本机有没有行楷"的探测——所有设备一视同仁。
+   （历史：一度用 canvas 量字宽探测本机字体，结果发现汉字在字体里一律占满一个字身，
+     量「康鹭地图」在任何字体下都是 576px，根本区分不出字体，那个探测是无效的。） */
 
 /* ---------- 启动 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
@@ -332,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initCover();
   initSideNav();
   initNavSheet();
-  initBrushTitles();
   initReveal();
   initCounters();
   initBars();
