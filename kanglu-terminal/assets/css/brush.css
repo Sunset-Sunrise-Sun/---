@@ -67,10 +67,14 @@
 :root{
   --brush-ink-strong:linear-gradient(170deg,#201d19 0%,#332e28 46%,#15130f 100%);
 }
-.band-title, .page-banner h1, .pd-head h1, .cm-txt, .h-sec, .h-sub,
-.chapter-inner h3, .wrap > h3{
+.band-title, .page-banner h1, .pd-head h1, .cover-title, .cm-txt, .h-sec, .h-sub,
+.wrap h3, .wrap h4, .chapter-inner h3, .chapter-inner h4{
   /* ⚠️ 必须 !important：style.css 里 .h-sub / .band-title 都写着 font-family:var(--serif)，
-     与本选择器权重相同（都是单类），谁后加载谁生效——不钉死很容易被悄悄换回衬线。 */
+     与本选择器权重相同（都是单类），谁后加载谁生效——不钉死很容易被悄悄换回衬线。
+     ⚠️ 用**后代选择器**（.wrap h3/h4）而不是直接子级：早先写 `.wrap > h3`，
+     结果被包在 .two-col / .reveal 里的 h3 全部漏掉（自审时才发现）。
+     ⚠️ .cover-title（首页封面大标题）也算大标题，只换字体不动颜色：
+     它压在封面照片上、用的是纸白色，一旦套墨色渐变就会看不见。 */
   font-family:var(--brush) !important;
   font-weight:400;
   letter-spacing:.03em;
@@ -89,8 +93,14 @@
   color:transparent; -webkit-text-fill-color:transparent;
 }
 /* ③ 三级：毛笔体但不做渐变，用纯墨色 —— 与上面两级拉开差别 */
-.h-sub, .chapter-inner h3, .wrap > h3{
+.h-sub, .wrap h3, .chapter-inner h3{
   font-size:var(--fs-h3); line-height:1.26;
+  color:var(--ink-2) !important; -webkit-text-fill-color:currentColor;
+}
+/* ④ 四级：卡片题/内文小标题。也用毛笔体（用户要求"所有标题"），
+   但字号最小、用更淡的墨色，与三级再拉一档 */
+.wrap h4, .chapter-inner h4{
+  font-size:clamp(21px, 2.1vw, 27px); line-height:1.3;
   color:var(--ink-2) !important; -webkit-text-fill-color:currentColor;
 }
 
