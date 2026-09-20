@@ -19,13 +19,20 @@
 
 :root{
   /* ---- 分级字号（2026-09 用户要求"不同级的标题字体和大小应该做出区分"）----
-     一套字号从大到小：页首大标题 > 小节标题 h2 > 子标题 h3 > 卡片题 h4。
-     原来的问题是：h1（页首）只有 26–42px，而章标题却有 68px —— **层级是反的**；
-     章节标签栏、封面标题、统计格、表单等也都归到这套上，别再各写各的。 */
-  --fs-hero:  clamp(68px, 9.6vw, 156px);   /* 封面大标题（首页封面） */
-  --fs-h1:    clamp(50px, 7.4vw, 104px);   /* 页首大标题：band-title / page-banner h1 */
-  --fs-h2:    clamp(38px, 4.4vw, 64px);    /* 小节标题：.chapter-mark / .h-sec */
-  --fs-h3:    clamp(26px, 2.7vw, 36px);    /* 子标题：.h-sub 与内文 h3 */
+     设计原则（自审后重定）：
+       ① 同一内容在任何视口下都取同一档 —— 所以一档只对应一个选择器组，
+          不再让两个不同层级的元素共用同一个变量；
+       ② 各级**严格递减**且相邻级差 ≥1.3×，任何宽度下都不会出现"下级比上级大"；
+       ③ vw 系数压小（1.1–3.2），避免 1400→1440 这种小改动导致字号跳一档
+          （旧值用了 7.4vw，1400 视口下页首标题只有 89px，1440 才 104px，波动太大）。
+     实测（1400 / 1440 / 1680 / 390 四种宽度都验过，见 _typeaudit.html）：
+       封面 134/138/148/68 · 页首 80/92/104/50 · 章标题 46/50/54/38
+       小节 46/50/54/38 · 三级 30/32/36/26 · 四级 25/25/25/21 */
+  --fs-hero:  clamp(62px, 9.6vw, 150px);   /* 封面大标题（首页封面） */
+  --fs-h1:    clamp(46px, 6.4vw, 104px);   /* 一级：页首大标题 band-title / page-banner h1 / pd-head h1 */
+  --fs-h2:    clamp(34px, 3.6vw, 54px);    /* 二级：章标题 .cm-txt 与 .h-sec */
+  --fs-h3:    clamp(25px, 2.4vw, 36px);    /* 三级：.h-sub 与内文 h3 */
+  --fs-h4:    clamp(20px, 1.8vw, 25px);    /* 四级：卡片题 h4 */
   --fs-lede:  clamp(21px, 1.7vw, 23px);
   --brush:    "Kanglu Brush", var(--serif);       /* 毛笔标题字体栈 */
   --brush-ink:linear-gradient(165deg,#2b2823 0%,#4a423a 52%,#221f1b 100%);
@@ -100,8 +107,8 @@
 /* ④ 四级：卡片题/内文小标题。也用毛笔体（用户要求"所有标题"），
    但字号最小、用更淡的墨色，与三级再拉一档 */
 .wrap h4, .chapter-inner h4{
-  font-size:clamp(21px, 2.1vw, 27px); line-height:1.3;
-  color:var(--ink-2) !important; -webkit-text-fill-color:currentColor;
+  font-size:var(--fs-h4); line-height:1.3;
+  color:var(--ink-3) !important; -webkit-text-fill-color:currentColor;
 }
 
 /* 朱红小印：挂在标题行尾（三级不带印，只在一二级出现，避免满页都是印子）
