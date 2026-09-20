@@ -21,7 +21,12 @@ window.KL_AI = {
      ai.js 的选择逻辑是「有 apiKey 就直连，否则用 proxyUrl」，
      而本机的 ../_ai-config.local.js 里有 apiKey —— 如果这里预填了 proxyUrl，
      本地演示也会被拽去走 Worker，Worker 那边 Key 一旦失效就整站不能答。
-     所以：本地留空；**部署上线时再把 Worker 地址填回来**。
+     所以：本地留空；**部署上线时再把后端地址填回来**。
+     ⚠️ 2026-09 实测：`*.workers.dev`（Cloudflare Worker）在国内**直连超时**，
+        所以国内部署时这一行要改成国内服务器的地址，例如：
+          proxyUrl:  'http://你的服务器公网IP'
+          proxyPath: '/api/ai/chat'
+        服务端就是 deploy-kit/server.js（单文件、零依赖），会自动处理流式与密钥。
      线上（github.io）不会加载 local 配置 → apiKey 为空 → 自动走代理。 */
   proxyUrl:  'https://kanglu-ai.kanglu-memory.workers.dev',
   proxyPath: '/chat',
