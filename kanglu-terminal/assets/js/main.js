@@ -275,40 +275,6 @@ function initSideNav(){
     window.addEventListener('resize', onScroll);
     update();
   }
-
-  /* 浮动标签：栏体保持 40px 不变宽（往右撑会压住正文——实测 1320px 视口正文左缘只有 50px），
-     改为在圆点右侧浮出一个带纸色底的标签。
-     ⚠️ 标签必须挂到 <body> 上：挂在 .side-nav 里会被它的 overflow:hidden 裁掉（踩过）。 */
-  const tip = document.createElement('div');
-  tip.className = 'kl-side-tip';
-  let tipHost = null;
-  function placeTip(item){
-    const label = item.getAttribute('data-label');
-    if (!label) return;
-    tip.textContent = label;
-    tip.classList.toggle('hot', item.classList.contains('on'));
-    if (tipHost !== document.body) { document.body.appendChild(tip); tipHost = document.body; }
-    tip.classList.add('on');
-    const dot = item.querySelector('.kl-dot') || item;
-    const r = dot.getBoundingClientRect();
-    const tr = tip.getBoundingClientRect();
-    let left = r.right + 12;
-    /* 右侧放不下就翻到左边（避免贴到视口外） */
-    if (left + tr.width > window.innerWidth - 12) left = Math.max(12, r.left - tr.width - 6);
-    let top = r.top + r.height / 2 - tr.height / 2;
-    top = Math.max(8, Math.min(top, window.innerHeight - tr.height - 8));
-    tip.style.left = Math.round(left) + 'px';
-    tip.style.top = Math.round(top) + 'px';
-  }
-  function hideTip(){ tip.classList.remove('on'); }
-  links.forEach((a) => {
-    a.addEventListener('mouseenter', () => placeTip(a));
-    a.addEventListener('focus', () => placeTip(a));
-    a.addEventListener('mouseleave', hideTip);
-    a.addEventListener('blur', hideTip);
-  });
-  if (nav) nav.addEventListener('mouseleave', hideTip);
-  window.addEventListener('scroll', hideTip, { passive:true });
 }
 
 /* ---------- 小屏的小节跳转面板（右下角「带路」按钮弹出） ----------

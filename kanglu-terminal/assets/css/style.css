@@ -1011,8 +1011,8 @@ section.has-band{ padding-top:0; }
      ⚠️ 实测各视口的正文左缘：1320 → x=50、1366 → 73、1440 → 110、1600 → 190、1920 → 350。
         栏左缘固定在 16px；若展开到能放下标签（需 178px，右缘 194px），
         在 1320/1366 视口会压住正文 120–150px —— 所以"整条展开"这条路走不通。
-     现在的做法：栏体保持 40px，悬停时把**标签浮在栏右侧**（.kl-side-tip，由 main.js 定位），
-        标签带纸色底与阴影，压在正文上也看得清，鼠标移开即消失。
+     现在的做法：悬停时**往右展开**成 150px 面板（见下方 :hover 规则），
+        面板会覆盖正文左侧那一片，这是原设计的行为、也是放下标签的唯一办法。
      ⚠️ 不要用 transform:translateY(-50%) 做垂直居中：父层的 transform 会成为 fixed 的
         包含块，把 right:auto 解析成"到包含块右边缘的距离"，展开会从左侧弹出去（实测踩过）。 */
   margin-top:calc(clamp(340px, 58vh, 560px) / -2);
@@ -1037,11 +1037,20 @@ section.has-band{ padding-top:0; }
   transition:width .25s ease, padding .25s ease, background-color .25s ease,
              border-color .25s ease, box-shadow .25s ease;
 }
-/* 悬停/键盘聚焦：**栏体不变宽**，只把标签浮出来（.kl-side-tip，由 main.js 定位）。
-   这里只做一点背景加深，告诉用户"可以点"。 */
+/* 悬停/键盘聚焦：往左展开成面板（右缘不动，不压正文）。 */
 .side-nav:hover,
 .side-nav:focus-within{
-  background:rgba(241,235,221,.9);
+  /* 展开：恢复原来的"往右撑开成面板"样式。
+     ⚠️ 这是几何上绕不开的取舍：面板要放下 4–5 字标签就需 150px，
+        而正文左缘在 1440 视口是 x=110、1600 是 190 —— 面板必然覆盖正文左侧那一片。
+        原设计就是这样（靠压层遮住正文），用户明确要这个观感。
+        "往左展开"我试过：左侧只有 16px，面板会出屏 94px，不可行。
+     宽度构成必须是 150 = 左 padding 12 + 圆点列 22 + 标签列 100 + 右 padding 16。
+     ⚠️ 圆点列是 22px（圆点只有 15px，居中）：曾误写成 50px，
+        多出的 28px 空白把标签挤出面板右缘，最后一个字又被裁（「况」）。 */
+  width:150px;
+  padding:20px 16px 20px 12px;
+  background:rgba(241,235,221,.95);
   border-color:var(--line);
   box-shadow:var(--shadow-md);
 }
@@ -1069,35 +1078,40 @@ section.has-band{ padding-top:0; }
 /* 每一项 = 一根细轴 + 一个圆点。**栏体不变宽**，标签由 main.js 挂到 body 上浮动显示
    （挂到 body 是为了绕开栏上的 overflow:hidden —— 否则标签会被裁掉，实测踩过）。 */
 .side-nav .item{
-  display:flex; align-items:center; justify-content:center;
-  padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
+  /* 原来的写法：圆点列 + 标签列。收起时标签列只有 6px（标签被裁在栏外 + opacity:0 兜底），
+     悬停展开后 grid 变 50px/100px，标签自然滑进来。 */
+  display:grid; grid-template-columns:22px 6px;
+  align-items:center; padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
   cursor:pointer;
+  transition:grid-template-columns .25s ease;
 }
-/* 浮动标签：由 main.js 在鼠标进入时定位到圆点右侧 */
-.kl-side-tip{
-  position:fixed; z-index:120; pointer-events:none;
-  padding:5px 12px; border-radius:8px;
-  background:rgba(241,235,221,.97); color:var(--ink);
-  border:1px solid var(--line); box-shadow:var(--shadow-md);
-  font-family:var(--serif); font-size:16px; line-height:1.25; white-space:nowrap;
-  opacity:0; transform:translateX(-6px);
-  transition:opacity .16s ease, transform .18s ease;
+.side-nav:hover .item, .side-nav:focus-within .item{ grid-template-columns:22px 100px; }
+/* 标签：宽度固定，位置由 grid 列宽决定（展开时文字不会横向跳）。
+   ⚠️ 100px 而不是 95px：最长标签「区位与概况」实测需 90px，95px 只剩 5px 余量太紧。
+   ⚠️ 展开宽度 178 = 左 padding 12 + 圆点列 50 + 标签列 100 + 右 padding 16，必须 ≥ 这个和，
+      否则最后一个字会被 overflow:hidden 裁掉（踩过：「况」只剩一半）。 */
+.side-nav .item span{
+  font-family:var(--serif); width:100px; flex:none;
+  opacity:0; transform:translateX(10px);
+  transition:opacity .2s ease, transform .25s ease, color .25s;
 }
-.kl-side-tip.on{ opacity:1; transform:none; }
-.kl-side-tip.hot{ color:var(--red); }
-/* 圆点：用真实元素（.kl-dot）而不是 ::before —— 因为 main.js 需要读它的实际位置
-   来给浮动标签定位，伪元素拿不到 getBoundingClientRect。 */
+.side-nav:hover .item span, .side-nav:focus-within .item span{ opacity:1; transform:none; }
+/* 圆点：用真实元素（.kl-dot）而不是 ::before —— main.js 要读它的实际位置来算竖轴对齐，
+   伪元素拿不到 getBoundingClientRect。 */
 .kl-dot{
-  display:block; flex:none; width:15px; height:15px; border-radius:50%;
+  display:block; justify-self:center; flex:none; width:15px; height:15px; border-radius:50%;
   /* 圆点需要足够对比度：纸色填充 + 浅描边落在纸色页面上会完全看不见 */
   background:var(--paper); border:2px solid rgba(121,112,95,.5);
   transition:background-color .2s, border-color .2s, box-shadow .2s;
+  position:relative; z-index:1;
 }
 .side-nav .item:hover .kl-dot{ border-color:var(--red); }
+.side-nav .item:hover span{ color:var(--red); }
 .side-nav .item.on .kl-dot{
   background:var(--red); border-color:var(--red);
   box-shadow:0 0 0 3px rgba(184,74,58,.16);
 }
+.side-nav .item.on span{ color:var(--red); font-weight:700; }
 
 /* ============================================================
    小屏（≤1199px）的小节跳转面板
@@ -1140,7 +1154,7 @@ section.has-band{ padding-top:0; }
 .nav-sheet .subnav a:last-child{ border-bottom:0; }
 @keyframes navSheetIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 /* 大屏不需要这个按钮与面板（门槛与 .side-nav 一致） */
-@media (min-width:1320px){
+@media (min-width:1440px){
   .nav-sheet-fab, .nav-sheet{ display:none; }
 }
 
@@ -1152,13 +1166,13 @@ section.has-band{ padding-top:0; }
    ⚠️ 侧边导航的显示门槛是 1320px（不是 1200px）：细轴收起后占 16+28 = 44px，
       而 1280px 视口下正文左缘只有 30px，1200–1319 这一段轴会压住正文，
       所以那一段整条隐藏，改用右下角的「带路」面板。 */
-@media (min-width:1320px){
+@media (min-width:1440px){
   body.has-sidenav{ --maxw:920px; }
   .subnav-wrap{ display:none; }
 }
 @media (min-width:1440px){ body.has-sidenav{ --maxw:1080px; } }
 @media (min-width:1680px){ body.has-sidenav{ --maxw:1220px; } }
-@media (max-width:1319px){ .side-nav{ display:none; } }
+@media (max-width:1439px){ .side-nav{ display:none; } }   /* 1439 以下改用右下角「带路」面板 */
 
 /* ============================================================
    杂志式图片排布（用户意见 ③）
