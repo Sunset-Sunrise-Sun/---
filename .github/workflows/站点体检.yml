@@ -1,0 +1,32 @@
+# 站点体检：每月自动跑一次，失败时 GitHub 会给仓库所有者发邮件通知。
+# 目的：半年后即使没人动过代码，也能第一时间知道「哪天突然访问不了」。
+#
+# 为什么需要它：站点本身是静态托管（很稳），但有三件外部依赖会"悄悄到期"——
+#   ① DeepSeek 密钥余额用完 → AI 退化（站点仍可浏览）
+#   ② Cloudflare Worker 被停用 / 改名 → AI 不可用
+#   ③ GitHub Pages 或仓库设置被改动 → 整站打不开
+# 这个工作流把上面三类都检查一遍。
+name: 站点体检
+
+on:
+  schedule:
+    # 每月 1 日 01:00 UTC（≈ 北京时间 09:00）
+    - cron: '0 1 1 * *'
+  workflow_dispatch:      # 也可以在 Actions 页面手动点一下就跑
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 运行站点体检
+        run: node 站点体检.js
+      # 失败时把结果贴进 Actions 摘要，方便直接看到哪一项坏了
+      - name: 失败提示
+        if: failure()
+        run: |
+          echo "### 站点体检未通过" >> $GITHUB_STEP_SUMMARY
+          echo "请查看上一步日志中标记为 ✗ 的项目。若只是「AI 后端」失败，站点仍可正常浏览。" >> $GITHUB_STEP_SUMMARY

@@ -1,66 +1,96 @@
-# 康鹭记忆 · Kanglu Memory
+# 康鹭记忆 · 广州康鹭制衣村数字人文调研
 
-一个关于广州海珠**康鹭片区**（康乐村、鹭江村）制衣产业与零工市场的数字人文网站。
-用结构化数据、空间标注与人物口述，保存一场正在发生的城市变迁。
+> **线上地址（对外分享用这个）**
+> https://sunset-sunrise-sun.github.io/---/kanglu-terminal/
+>
+> 短链接（自动跳到新版）：https://sunset-sunrise-sun.github.io/---/
 
-## 在线访问
+约 1.1 平方公里的康乐村与鹭江村，聚集近 2 万家制衣厂与档口、10 万常住人口，
+24 小时就能把一卷布变成成衣，被称为「广州最贵旧改」的凤和（康乐、鹭江）更新正在进行。
+本站用地图、口述与可核对的数字记录它。
 
-开启 GitHub Pages 后：
+## 仓库里有什么
 
-**https://sunset-sunrise-sun.github.io/---/**
+| 目录 / 文件 | 说明 |
+|---|---|
+| `kanglu-terminal/` | **当前线上版**，GitHub Pages 发布这一份 |
+| `kanglu-dh/` | 旧版，保留存档（线上仍可访问，但不再更新） |
+| `worker/` | AI 小白鹭的后端（Cloudflare Worker），持有 DeepSeek 密钥 |
+| 根 `index.html` | 跳转页：把根网址送到 `kanglu-terminal/` |
+| `站点体检.js` | 一条命令检查线上是否正常（见下） |
 
-（根目录的 `index.html` 会自动跳到 `kanglu-dh/index.html`。）
+> **交付压缩包不在仓库里。** `康鹭记忆-终版-交付.zip` 每次改版都重打一次，
+> 历史上累积到 266 MB（占整个仓库 92.7%）。zip 保留在本地用于线下分享；
+> 线上体验请用上面的网址。
 
-开启方式：仓库 **Settings → Pages → Source** 选 `Deploy from a branch`，
-分支选 `main`、目录选 `/ (root)`，保存后等一两分钟。
+## 日常维护：会「到期」的只有三处
 
-## 本地查看
+站点是纯静态托管，**没有任何 CDN / 外部字体 / 统计脚本依赖**，
+"打不开"的风险很低。真正会随时间出问题的是这三件：
 
-不需要服务器、不需要安装任何东西：**双击 `kanglu-dh/index.html`** 即可
-（整站零依赖，不联网、不加载任何外部资源）。
+| 依赖 | 失效后果 | 怎么防 |
+|---|---|---|
+| **DeepSeek 密钥余额** | AI 小白鹭退化成「站内检索模式」（**站点照常可看**，页面会如实标注） | 定期登录 platform.deepseek.com 看余额；**建议设消费上限**，防止被刷 |
+| **Cloudflare Worker**（`kanglu-ai.kanglu-memory.workers.dev`） | AI 不可用 | 别改 Worker 名字；Worker 在 Cloudflare 免费额度内不会过期 |
+| **GitHub Pages** | 整站打不开 | 保持仓库公开、Pages 设置不改动；靠下面的自动体检第一时间发现 |
 
-## 目录
+## 每月自动体检（失败会发邮件）
 
+`.github/workflows/站点体检.yml` 每月 1 日自动跑一次 `站点体检.js`，检查：
+7 个页面、7 个关键资源、分享元数据、AI 后端、根网址跳转。
+**任何一项失败，GitHub 会给仓库所有者发邮件。**
+
+想立刻触发一次：仓库 **Actions → 站点体检 → Run workflow**。
+
+本地手动跑（需要代理时先设环境变量）：
+
+```powershell
+$env:HTTPS_PROXY='http://127.0.0.1:7890'
+node 站点体检.js
 ```
-kanglu-dh/
-  index.html        首页：封面、康鹭简介、数字特征、板块入口、发展历程、人物档案
-  background.html   背景资料：区位、产业逻辑、空间形态、编年、乡土词条、改造与政策、现场材料、参考文献
-  map.html          康鹭地图：关系示意图（15 个空间节点）+ 规划图对照
-  people.html       人物档案：4 份田野访谈
-  person.html       单份档案详情（?id=a1 … a4）
-  statement.html    声明与方法：资料来源、隐私与伦理、数据范围、AI 边界、版权
-  assets/css/       样式
-  assets/js/        数据（data.js / people-data.js）与交互
-  assets/img/       田野影像、展板、封面
-DEVNOTES.md         开发日志（排查记录、验证方法、待办）
-```
 
-## AI 问答（右下角的小白鹭）
+退出码 `0` = 全部正常；`1` = 有项目失败。
 
-点右下角的**小白鹭**打开对话框，可以拖动它；它的头会一直朝着鼠标。
+## 改了内容怎么发布
 
-- **未配置接口时**：走「本地检索」——从站内数据里找最相关的片段作答，并明确标注
-  「未接入 AI 模型」，不会冒充 AI，也不需要任何密钥
-- **要接真实大模型**：把 `kanglu-dh/assets/js/ai-config.js` 按
-  `ai-config.example.js` 的说明填写。接口按 OpenAI 兼容格式（`/chat/completions` + 流式），
-  DeepSeek、通义、智谱、Moonshot 等都通用
+1. 编辑 `康鹭记忆-终版/` 里的源文件（这是编辑用目录）
+2. 打交付包（同时会做自检：断链图片、缺失资源、密钥泄漏扫描）
+   ```powershell
+   node _pack-final.js
+   ```
+3. 同步到发布目录并推送（本机访问 GitHub 需要代理）
+   ```powershell
+   # _pack-final.js 之后，把 康鹭记忆-终版/ 同步到 kanglu-terminal/
+   git add -A kanglu-terminal
+   git commit -m "说明这次改了什么"
+   git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 push origin main
+   ```
+4. 等约 1 分钟让 Pages 构建，再跑 `node 站点体检.js` 确认。
 
-**关于密钥**：本地演示可以直连，密钥写在 `ai-config.local.js`（该文件已被 gitignore，
-不会入库、也不会被部署）。线上要让 AI 真正工作，必须走一个持密钥的代理——
-代码与部署步骤见 [`worker/`](worker/README.md)，里面有一份**已在本地跑通的** Cloudflare Worker
-（预检、正常调用、流式透传、来源白名单都验过）。
-**不要把密钥写进会发布的文件里。**
+> 样式/脚本引用都带 `?v=` 版本戳，正常刷新即生效；万一还是旧的按 **Ctrl+F5**。
 
-## 分享给别人看
+## AI 小白鹭（右下角那只）
 
-**开启 GitHub Pages**（仓库 Settings → Pages → Source 选 `main` / `(root)`），
-链接即为 `https://sunset-sunrise-sun.github.io/---/`。
+- 点它打开对话框，可拖动；**线上已接 DeepSeek**，由 Cloudflare Worker 持密钥代转
+- Worker 不可用时自动退化为「站内检索模式」，**页面会明确标注**，不会假装是 AI
+- **密钥绝不进仓库**：本地配置在项目根目录的 `_ai-config.local.js`（已 gitignore），
+  线上密钥放在 Cloudflare 的 Secret 里。详见 [`worker/`](worker/README.md)
 
-线上没有密钥文件，所以分享出去的版本里 AI 会走「本地检索」模式（界面、动效、
-拖动、转头、气泡都正常）。要让线上的 AI 也接真实模型，先把 `worker/` 部署好，
-再把 Worker 地址填进 `ai-config.js` 的 `proxyUrl`，然后重新推送。
+## 备份建议（半年尺度）
 
-## 说明
+- **代码**：本仓库即备份；建议每学期导出一次（仓库页 → Code → Download ZIP）
+- **素材**：`康鹭记忆-终版/assets/img/` 是唯一一份成品图，建议 U 盘 / 网盘各存一份
+- **交付包**：`康鹭记忆-终版-交付.zip`（本地）含全部源码、文档与素材，可离线双击打开
+  （离线时 AI 走站内检索模式——密钥不能进网页，这是安全设计）
 
-本站图片均为课题组田野拍摄；涉及的电话号码已打码，人物以中远景为主。
-引用与转载要求见站内「声明与方法」页。
+## 详细文档（都在交付包里）
+
+- 《运行与使用说明》——给使用者的操作说明
+- 《开发与维护笔记》——改版时**不要推翻**的排版规则与踩过的坑
+- 站内 `statement.html`「关于研究」——每个数字的来源与统计口径
+
+## 图片与隐私
+
+本站图片为课题组田野拍摄；**展板照片中的电话与微信号已打码**，
+无法靠裁切解决的人群影像已对**可辨识人脸作轻微模糊**，人物以中远景为主；
+空间重建为**示意性重建，非测绘成果**。引用与转载要求见站内「声明与方法」。
