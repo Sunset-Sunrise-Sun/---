@@ -75,11 +75,14 @@
   --brush-ink-strong:linear-gradient(170deg,#201d19 0%,#332e28 46%,#15130f 100%);
 }
 .band-title, .page-banner h1, .pd-head h1, .cover-title, .cm-txt, .h-sec, .h-sub,
-.wrap h3, .wrap h4, .chapter-inner h3, .chapter-inner h4{
+.wrap h3, .wrap h4, .chapter-inner h3, .chapter-inner h4,
+.chapter-inner h1, .chapter-inner h2{
   /* ⚠️ 必须 !important：style.css 里 .h-sub / .band-title 都写着 font-family:var(--serif)，
      与本选择器权重相同（都是单类），谁后加载谁生效——不钉死很容易被悄悄换回衬线。
      ⚠️ 用**后代选择器**（.wrap h3/h4）而不是直接子级：早先写 `.wrap > h3`，
      结果被包在 .two-col / .reveal 里的 h3 全部漏掉（自审时才发现）。
+     ⚠️ `.chapter-inner h1/h2` 也要收：页内小节标题有人写成 `<h1>`（chronicle 的
+     「正在发生的改变」就是），只写 h3/h4 会漏掉它——自审脚本抓到过一次。
      ⚠️ .cover-title（首页封面大标题）也算大标题，只换字体不动颜色：
      它压在封面照片上、用的是纸白色，一旦套墨色渐变就会看不见。 */
   font-family:var(--brush) !important;
@@ -93,7 +96,10 @@
   -webkit-background-clip:text; background-clip:text;
   color:transparent; -webkit-text-fill-color:transparent;
 }
-.cm-txt, .h-sec{
+/* ② 二级（小节标题）：墨色渐变。
+   `.chapter-inner h1/h2` 归到这一档：它们是**页内小节标题**（如 chronicle 的
+   「正在发生的改变」写成了 <h1>），不是页面主标题，所以按二级字号，不能占 --fs-h1。 */
+.cm-txt, .h-sec, .chapter-inner h1, .chapter-inner h2{
   font-size:var(--fs-h2); line-height:1.16;
   background-image:var(--brush-ink);
   -webkit-background-clip:text; background-clip:text;
