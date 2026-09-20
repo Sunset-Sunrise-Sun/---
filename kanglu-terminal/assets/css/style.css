@@ -1017,7 +1017,10 @@ section.has-band{ padding-top:0; }
      四项要**均分**那 340–560px 的高度，轴才拉得开、进度线才有意义。
      漏掉 space-between 的话四项会全挤在顶部（改版时踩过，用户一眼就看出来了）。 */
   display:flex; flex-direction:column; justify-content:space-between;
-  width:28px;
+  /* 宽度：收起时要能放下【圆点 15px + 它 3px 的发光圈】并留白，
+     28px 会让圆点贴边、激活态的 box-shadow 被 overflow 裁掉（实测：第一个圆点左边被切）。
+     40px 下圆点中心在栏内 x=20，栏左缘 16px + 40/2 = 36px，仍在正文左侧留白内（≥1280px 才显示）。 */
+  width:40px;
   height:clamp(340px, 58vh, 560px);
   padding:22px 0;
   overflow:hidden;
@@ -1040,21 +1043,30 @@ section.has-band{ padding-top:0; }
   border-color:var(--line);
   box-shadow:var(--shadow-md);
 }
-/* 收起时轴偏一点，和导航项（.item）的圆点列对齐；展开后回到原位。
-   轴的灰比原来深一点（.28 → .45），浅色照片上要看得见才算"有东西"。 */
+/* 收起时轴与导航项的圆点列**对齐**；展开后回到面板内的位置。
+   对齐怎么算的：.item 的 grid 第一列（圆点列）宽 22px、圆点 15px 居中，
+   栏无边框时第一列从栏内 x=0 起 → 圆点中心 x=11；
+   栏宽 40px 时栏内绝对坐标 = 11px；展开后 grid 变 50px，圆点中心 x=25。
+   轴的灰比原来深一点（.28 → .45），浅色照片上要看得见才算"有东西"。
+   ⚠️ 改栏宽或 grid 列宽时，这里的 left 必须同步改，否则圆点与竖轴会错位（肉眼很明显）。 */
 .side-nav .track{
-  position:absolute; top:32px; bottom:32px; width:2px;
-  left:10px;
+  /* top/bottom = 栏内 22px 内边距 + 圆点半径 7.5px = 29.5px
+     → 竖轴正好从**第一个圆点的中心**画到**最后一个圆点的中心**。
+     原先是 32px，比第一个圆点中心还高 2.5px，轴会插进圆点上方，
+     视觉上像第一个点被切了一块（实测截图确认）。 */
+  position:absolute; top:29.5px; bottom:29.5px; width:2px;
+  left:11px;
   background:rgba(121,112,95,.45); border-radius:1px; overflow:hidden;
   transition:left .25s ease;
 }
-.side-nav:hover .track, .side-nav:focus-within .track{ left:22px; }
+.side-nav:hover .track, .side-nav:focus-within .track{ left:25px; }
 .side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
 /* 每一项 = 圆点列 + 标签列。收起时只剩 6px 给标签，标签被裁在轴外（且 opacity:0 兜底）；
    展开时圆点列 50px、面板 145px，标签自然滑进来。
    为什么不用「负边距 + 右对齐」那套：负边距会把圆点一起挤出轴、被 overflow 裁掉（实测踩过，
    像素扫描显示轴带里 0 个深色像素）。 */
 .side-nav .item{
+  /* 收起：圆点列 22px（圆点 15px 居中 → 中心 x=11，与 .track 的 left:11px 对齐）+ 标签列 6px */
   display:grid; grid-template-columns:22px 6px;
   align-items:center; padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
   transition:grid-template-columns .25s ease;
