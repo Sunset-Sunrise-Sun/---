@@ -1073,13 +1073,11 @@ section.has-band{ padding-top:0; }
 /* 栏体不变宽，所以竖轴**不需要**随悬停移动（原先展开到 145px 时要把它挪到 25px）。
    现在收起/悬停都在 11px，正好穿过圆点中心。 */
 .side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
+/* 每一项 = 圆点列 + 标签列。收起时标签列只有 6px（标签被裁在栏外 + opacity:0 兜底）；
+   悬停展开后 grid 变 22px/100px，标签自然滑进来。
    为什么不用「负边距 + 右对齐」那套：负边距会把圆点一起挤出轴、被 overflow 裁掉（实测踩过，
    像素扫描显示轴带里 0 个深色像素）。 */
-/* 每一项 = 一根细轴 + 一个圆点。**栏体不变宽**，标签由 main.js 挂到 body 上浮动显示
-   （挂到 body 是为了绕开栏上的 overflow:hidden —— 否则标签会被裁掉，实测踩过）。 */
 .side-nav .item{
-  /* 原来的写法：圆点列 + 标签列。收起时标签列只有 6px（标签被裁在栏外 + opacity:0 兜底），
-     悬停展开后 grid 变 50px/100px，标签自然滑进来。 */
   display:grid; grid-template-columns:22px 6px;
   align-items:center; padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
   cursor:pointer;
@@ -1088,8 +1086,9 @@ section.has-band{ padding-top:0; }
 .side-nav:hover .item, .side-nav:focus-within .item{ grid-template-columns:22px 100px; }
 /* 标签：宽度固定，位置由 grid 列宽决定（展开时文字不会横向跳）。
    ⚠️ 100px 而不是 95px：最长标签「区位与概况」实测需 90px，95px 只剩 5px 余量太紧。
-   ⚠️ 展开宽度 178 = 左 padding 12 + 圆点列 50 + 标签列 100 + 右 padding 16，必须 ≥ 这个和，
-      否则最后一个字会被 overflow:hidden 裁掉（踩过：「况」只剩一半）。 */
+   ⚠️ 展开宽度 150 = 左 padding 12 + 圆点列 22 + 标签列 100 + 右 padding 16，必须 ≥ 这个和，
+      否则最后一个字会被 overflow:hidden 裁掉（踩过：「况」只剩一半）。
+   ⚠️ 圆点列是 22px（圆点只有 15px、居中）：曾误写成 50px，多出的 28px 空白把标签挤出面板右缘。 */
 .side-nav .item span{
   font-family:var(--serif); width:100px; flex:none;
   opacity:0; transform:translateX(10px);
