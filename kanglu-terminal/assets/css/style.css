@@ -1531,9 +1531,36 @@ section.has-band{ padding-top:0; }
   .feature.flip .feature-media{ order:0; }
 }
 @media (max-width:760px){
-  .band{ height:clamp(260px, 34vh, 380px); }
-  .band.short{ height:clamp(190px, 26vh, 300px); }
+  /* ⚠️ 手机上页首带内容被裁掉的真因（实测出来的，别再走弯路）：
+     .band 是**固定 height + overflow:hidden + align-items:flex-end**，
+     而带里的 .band-cap（眉标 + 大标题 + 正文）在窄屏换行后高达 400px 以上，
+     原来把带压到 clamp(260px,34vh,380px) —— 带装不下内容，内容就从带上边缘往上溢出，
+     被裁掉、并顶到 sticky 顶栏底下（390px 屏实测溢出 114px）。
+     ⚠️ 只把 height 改成 auto **没用**：只要还留着 min-height:520px，
+        高度就由 min-height 决定（520 < 内容所需时照样溢出；实测 auto+min520 仍是 520/溢出 119）。
+        必须同时 **min-height:0**，让高度真正由内容决定。
+     ⚠️ 但纯 auto 时 band 只有 401px，图片太矮。所以先**把内容压矮**
+        （标题与正文在小屏各降一档字号、正文限宽收窄），再让带取内容高度——
+        最终带高约 430–460px，图够看、内容不被裁。 */
+  .band-title{ font-size:clamp(34px, 8.6vw, 46px); line-height:1.12; }
+  .band-sub{ font-size:17.5px; line-height:1.75; max-width:34ch; }
+  .band-kicker{ margin-bottom:8px; }
+  .crumb{ font-size:11.5px; }
+
+  .band{ height:auto; min-height:0; }
+  .band--hero{ height:auto; min-height:0; }
+  .band.short{ height:auto; min-height:0; }
   .band-cap{ padding-bottom:16px; }
+  /* 手机上带变高了，纸色压层是按百分比分布的，这里把过渡带整体下移一点，
+     让照片占的比例不变，也给文字留足实底。 */
+  .band-veil{
+    background:linear-gradient(180deg,
+      var(--paper) 0%, rgba(241,235,221,.88) 3%, rgba(241,235,221,.56) 10%,
+      rgba(241,235,221,.26) 22%, rgba(241,235,221,.16) 40%,
+      rgba(241,235,221,.20) 56%, rgba(241,235,221,.34) 68%,
+      rgba(241,235,221,.52) 78%, rgba(241,235,221,.72) 86%,
+      rgba(241,235,221,.90) 93%, var(--paper) 98%);
+  }
   .feature{ margin-top:38px; }
   .panel-row{ grid-template-columns:1fr; gap:18px; margin-top:38px; }
 }
