@@ -1007,11 +1007,14 @@ section.has-band{ padding-top:0; }
    ============================================================ */
 .side-nav{
   position:fixed; left:16px; top:50%; z-index:60;
-  /* 收起时是一条 28px 的细轴（只有圆点和进度线），悬停/键盘聚焦才展开成 145px 面板。
-     28px 是按实测定的：正文左缘最小处是 1280px 视口的 30px，所以 16+28=44 > 30 会压住；
-     因此再加一条 min-width 门槛（见下方 @media 1320px），低于它就整条隐藏、改用右下角面板。
+  /* 收起：一条 40px 的细轴（圆点 + 阅读进度线）。**这条栏永远不撑宽。**
+     ⚠️ 实测各视口的正文左缘：1320 → x=50、1366 → 73、1440 → 110、1600 → 190、1920 → 350。
+        栏左缘固定在 16px；若展开到能放下标签（需 178px，右缘 194px），
+        在 1320/1366 视口会压住正文 120–150px —— 所以"整条展开"这条路走不通。
+     现在的做法：栏体保持 40px，悬停时把**标签浮在栏右侧**（.kl-side-tip，由 main.js 定位），
+        标签带纸色底与阴影，压在正文上也看得清，鼠标移开即消失。
      ⚠️ 不要用 transform:translateY(-50%) 做垂直居中：父层的 transform 会成为 fixed 的
-     包含块，把 right:auto 解析成"到包含块右边缘的距离"，展开会从左侧弹出去（实测踩过）。 */
+        包含块，把 right:auto 解析成"到包含块右边缘的距离"，展开会从左侧弹出去（实测踩过）。 */
   margin-top:calc(clamp(340px, 58vh, 560px) / -2);
   /* ⚠️ 必须保留 display:flex + column + space-between：
      四项要**均分**那 340–560px 的高度，轴才拉得开、进度线才有意义。
@@ -1034,12 +1037,11 @@ section.has-band{ padding-top:0; }
   transition:width .25s ease, padding .25s ease, background-color .25s ease,
              border-color .25s ease, box-shadow .25s ease;
 }
-/* 展开：靠 :hover / :focus-within 触发；键盘用户按 Tab 进去也会展开 */
+/* 悬停/键盘聚焦：**栏体不变宽**，只把标签浮出来（.kl-side-tip，由 main.js 定位）。
+   这里只做一点背景加深，告诉用户"可以点"。 */
 .side-nav:hover,
 .side-nav:focus-within{
-  width:145px;
-  padding:20px 16px 20px 12px;
-  background:rgba(241,235,221,.93);
+  background:rgba(241,235,221,.9);
   border-color:var(--line);
   box-shadow:var(--shadow-md);
 }
@@ -1059,39 +1061,43 @@ section.has-band{ padding-top:0; }
   background:rgba(121,112,95,.45); border-radius:1px; overflow:hidden;
   transition:left .25s ease;
 }
-.side-nav:hover .track, .side-nav:focus-within .track{ left:25px; }
+/* 栏体不变宽，所以竖轴**不需要**随悬停移动（原先展开到 145px 时要把它挪到 25px）。
+   现在收起/悬停都在 11px，正好穿过圆点中心。 */
 .side-nav .track i{ display:block; width:100%; height:0; background:var(--red); transition:height .16s linear; }
-/* 每一项 = 圆点列 + 标签列。收起时只剩 6px 给标签，标签被裁在轴外（且 opacity:0 兜底）；
-   展开时圆点列 50px、面板 145px，标签自然滑进来。
    为什么不用「负边距 + 右对齐」那套：负边距会把圆点一起挤出轴、被 overflow 裁掉（实测踩过，
    像素扫描显示轴带里 0 个深色像素）。 */
+/* 每一项 = 一根细轴 + 一个圆点。**栏体不变宽**，标签由 main.js 挂到 body 上浮动显示
+   （挂到 body 是为了绕开栏上的 overflow:hidden —— 否则标签会被裁掉，实测踩过）。 */
 .side-nav .item{
-  /* 收起：圆点列 22px（圆点 15px 居中 → 中心 x=11，与 .track 的 left:11px 对齐）+ 标签列 6px */
-  display:grid; grid-template-columns:22px 6px;
-  align-items:center; padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
-  transition:grid-template-columns .25s ease;
+  display:flex; align-items:center; justify-content:center;
+  padding:0; font-size:18px; color:var(--ink-2); white-space:nowrap;
+  cursor:pointer;
 }
-.side-nav:hover .item, .side-nav:focus-within .item{ grid-template-columns:50px 95px; }
-/* 标签：宽度固定，位置由 grid 的列宽决定 —— 这样展开时文字不会横向跳 */
-.side-nav .item span{
-  font-family:var(--serif); width:95px; flex:none;
-  opacity:0; transform:translateX(10px);
-  transition:opacity .2s ease, transform .25s ease, color .25s;
+/* 浮动标签：由 main.js 在鼠标进入时定位到圆点右侧 */
+.kl-side-tip{
+  position:fixed; z-index:120; pointer-events:none;
+  padding:5px 12px; border-radius:8px;
+  background:rgba(241,235,221,.97); color:var(--ink);
+  border:1px solid var(--line); box-shadow:var(--shadow-md);
+  font-family:var(--serif); font-size:16px; line-height:1.25; white-space:nowrap;
+  opacity:0; transform:translateX(-6px);
+  transition:opacity .16s ease, transform .18s ease;
 }
-.side-nav:hover .item span, .side-nav:focus-within .item span{ opacity:1; transform:none; }
-.side-nav .item::before{
-  content:""; position:relative; z-index:1; justify-self:center; flex:none;
-  width:15px; height:15px; border-radius:50%;
+.kl-side-tip.on{ opacity:1; transform:none; }
+.kl-side-tip.hot{ color:var(--red); }
+/* 圆点：用真实元素（.kl-dot）而不是 ::before —— 因为 main.js 需要读它的实际位置
+   来给浮动标签定位，伪元素拿不到 getBoundingClientRect。 */
+.kl-dot{
+  display:block; flex:none; width:15px; height:15px; border-radius:50%;
   /* 圆点需要足够对比度：纸色填充 + 浅描边落在纸色页面上会完全看不见 */
-  background:var(--paper); border:2px solid rgba(121,112,95,.5); transition:.25s;
+  background:var(--paper); border:2px solid rgba(121,112,95,.5);
+  transition:background-color .2s, border-color .2s, box-shadow .2s;
 }
-.side-nav .item:hover::before{ border-color:var(--red); }
-.side-nav .item:hover span{ color:var(--red); }
-.side-nav .item.on::before{
+.side-nav .item:hover .kl-dot{ border-color:var(--red); }
+.side-nav .item.on .kl-dot{
   background:var(--red); border-color:var(--red);
   box-shadow:0 0 0 3px rgba(184,74,58,.16);
 }
-.side-nav .item.on span{ color:var(--red); font-weight:700; }
 
 /* ============================================================
    小屏（≤1199px）的小节跳转面板
